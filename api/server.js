@@ -58,14 +58,15 @@ app.get('/api/ranking', async (req, res) => {
     const limit = Math.min(toInt(req.query.limit, 20, 1), 50);
     const { rows } = await pool.query(
       `SELECT
-         ROW_NUMBER() OVER (ORDER BY pontuacao DESC, criado_em ASC) AS posicao,
+         ROW_NUMBER() OVER (ORDER BY fase_maxima DESC, pontuacao DESC, criado_em ASC) AS posicao,
          apelido,
          pontuacao,
          noites_completas,
          vitoria,
+         fase_maxima,
          TO_CHAR(criado_em AT TIME ZONE 'America/Sao_Paulo', 'DD/MM/YY') AS data
        FROM pontuacoes
-       ORDER BY pontuacao DESC, criado_em ASC
+       ORDER BY fase_maxima DESC, pontuacao DESC, criado_em ASC
        LIMIT $1`,
       [limit]
     );
@@ -77,27 +78,28 @@ app.get('/api/ranking', async (req, res) => {
 });
 
 // POST /api/score
-// Body: { apelido, pontuacao, noites_completas, vitoria }
+// Body: { apelido, pontuacao, noites_completas, vitoria, fase_maxima }
 app.post('/api/score', async (req, res) => {
   try {
-    const apelido         = sanitizeApelido(req.body.apelido);
-    const pontuacao       = toInt(req.body.pontuacao, 0, 0);
+    const apelido          = sanitizeApelido(req.body.apelido);
+    const pontuacao        = toInt(req.body.pontuacao, 0, 0);
     const noites_completas = toInt(req.body.noites_completas, 0, 0);
-    const vitoria         = Boolean(req.body.vitoria);
+    const vitoria          = Boolean(req.body.vitoria);
+    const fase_maxima      = Math.max(1, Math.min(3, toInt(req.body.fase_maxima, 1, 1)));
 
-    // Inserir e retornar o registro
     const insert = await pool.query(
-      `INSERT INTO pontuacoes (apelido, pontuacao, noites_completas, vitoria)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, apelido, pontuacao, noites_completas, vitoria`,
-      [apelido, pontuacao, noites_completas, vitoria]
+      `INSERT INTO pontuacoes (apelido, pontuacao, noites_completas, vitoria, fase_maxima)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, apelido, pontuacao, noites_completas, vitoria, fase_maxima`,
+      [apelido, pontuacao, noites_completas, vitoria, fase_maxima]
     );
     const registro = insert.rows[0];
 
-    // Calcular posição no ranking global
+    // Posição no ranking (mesmo critério de ordenação)
     const pos = await pool.query(
-      `SELECT COUNT(*) + 1 AS posicao FROM pontuacoes WHERE pontuacao > $1`,
-      [pontuacao]
+      `SELECT COUNT(*) + 1 AS posicao FROM pontuacoes
+       WHERE fase_maxima > $1 OR (fase_maxima = $1 AND pontuacao > $2)`,
+      [fase_maxima, pontuacao]
     );
     registro.posicao = parseInt(pos.rows[0].posicao);
 
