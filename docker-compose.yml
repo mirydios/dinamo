@@ -1,4 +1,55 @@
 services:
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: dinamo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       dinamo_ranking
+      POSTGRES_USER:     dinamo
+      POSTGRES_PASSWORD: dinamo123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./api/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dinamo -d dinamo_ranking"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dinamo-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+  # ── API Node.js ───────────────────────────────────────────────────────────
+  api:
+    build: ./api
+    image: dinamo-api:1.0
+    container_name: dinamo-api
+    restart: unless-stopped
+    environment:
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      PG_DB:   dinamo_ranking
+      PG_USER: dinamo
+      PG_PASS: dinamo123
+      PORT:    "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dinamo-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.25"
+
+  # ── Nginx (frontend) ──────────────────────────────────────────────────────
   dinamo-sombrio:
     build: .
     image: dinamo-sombrio:1.0
@@ -8,7 +59,10 @@ services:
       # Acesso direto: http://SEU_IP:8090
       # Troque 8090 se a porta já estiver em uso na sua VPS
       - "8090:80"
-    # Limites para conviver bem com n8n, Postgres etc. na mesma VPS
+    depends_on:
+      - api
+    networks:
+      - dinamo-net
     deploy:
       resources:
         limits:
@@ -20,14 +74,22 @@ services:
     # remova o bloco "ports" acima e descomente as linhas abaixo,
     # ajustando o domínio e o nome da rede do seu Traefik.
     # ------------------------------------------------------------------
-    # networks:
-    #   - traefik
     # labels:
     #   - "traefik.enable=true"
     #   - "traefik.http.routers.dinamo.rule=Host(`jogo.seudominio.com.br`)"
     #   - "traefik.http.routers.dinamo.entrypoints=websecure"
     #   - "traefik.http.routers.dinamo.tls.certresolver=letsencrypt"
     #   - "traefik.http.services.dinamo.loadbalancer.server.port=80"
+    #   - "traefik.docker.network=traefik"
+
+# ── Volumes & Redes ───────────────────────────────────────────────────────
+volumes:
+  postgres-data:
+    driver: local
+
+networks:
+  dinamo-net:
+    driver: bridge
 
 # networks:
 #   traefik:
