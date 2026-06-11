@@ -68,7 +68,8 @@ export const FaseDinamo = {
       s.travado -= dt; s.vapor.push({ x: W / 2 + (Math.random() - .5) * 60, y: H * .62, vy: -.6 - Math.random(), vida: 1, r: 4 + Math.random() * 6 });
       if (s.travado <= 0) s.calor = 45;
     } else {
-      if (s.carga > 78) s.calor = Math.min(100, s.calor + ((s.carga - 78) / 22) * s.cfg.calorTaxa * dt);
+      let multCalor = GLOBAL.pesadelo ? 1.2 : 1;
+      if (s.carga > 78) s.calor = Math.min(100, s.calor + ((s.carga - 78) / 22) * s.cfg.calorTaxa * multCalor * dt);
       else s.calor = Math.max(0, s.calor - 20 * dt);
       if (s.calor >= 100) { s.travado = s.cfg.travaDur; s.rpm = 0; s.tremor = 1; blip(200, .8, .25, 'sawtooth'); }
     }
@@ -81,7 +82,8 @@ export const FaseDinamo = {
     } else s.trocaProg = Math.max(0, s.trocaProg - dt * 2);
 
     if (s.carga < 35) {
-      s.prox = Math.min(100, s.prox + ((35 - s.carga) / 35) * s.cfg.criatura * dt);
+      let multMonstro = GLOBAL.pesadelo ? 1.3 : 1;
+      s.prox = Math.min(100, s.prox + ((35 - s.carga) / 35) * s.cfg.criatura * multMonstro * dt);
       if (!s.olhos.length) {
         const n = 2 + Math.floor(Math.random() * 3) + GLOBAL.noiteDinamo;
         for (let i = 0; i < n; i++) s.olhos.push({ x: Math.random() < .5 ? W * (.05 + Math.random() * .18) : W * (.77 + Math.random() * .18), y: H * (.25 + Math.random() * .45), pisca: Math.random() * 6 });

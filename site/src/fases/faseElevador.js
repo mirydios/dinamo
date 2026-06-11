@@ -40,7 +40,7 @@ export const FaseElevador = {
     const dtg = performance.now() - this.S.ultimoGiro; this.S.ultimoGiro = performance.now();
 
     this.S.y += 0.8;
-    if (dtg < 250) this.S.tensao += 4;
+    if (dtg < 250) this.S.tensao += GLOBAL.pesadelo ? 6 : 4;
     blip(180, .05, .08, 'square');
   },
   atualizar(dt) {
@@ -56,7 +56,7 @@ export const FaseElevador = {
       s.y = Math.max(0, s.y - 15); s.tensao = 0; s.tremerCabo = 1; blip(80, .5, .5, 'sawtooth');
     }
 
-    s.cy += 1.8 * dt;
+    s.cy += (GLOBAL.pesadelo ? 2.5 : 1.8) * dt;
 
     if (s.y >= 100) completarFase(s.t);
     else if (s.cy >= s.y) triggerMorte('A criatura invadiu o elevador pelo alçapão.');

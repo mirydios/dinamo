@@ -26,8 +26,9 @@ export const FaseExterior = {
 
     // Gerar mapa (obstáculos e barris)
     let cy = 200;
+    const chanceBarril = GLOBAL.pesadelo ? 0.08 : 0.15;
     while(cy < this.S.distanciaFinal - 300) {
-      if(Math.random() < 0.15) {
+      if(Math.random() < chanceBarril) {
         // Barril de fogo
         this.S.obstaculos.push({ x: W*0.2 + Math.random()*W*0.6, y: cy, tipo: 'barril' });
         cy += 400 + Math.random()*300;
@@ -114,7 +115,7 @@ export const FaseExterior = {
       s.calor = Math.min(100, s.calor + 25 * dt); // Aquece rápido
       if(Math.random()<0.1) blip(400, 0.05, 0.02, 'sine');
     } else {
-      s.calor -= 2.5 * dt; // Congela
+      s.calor -= (GLOBAL.pesadelo ? 4 : 2.5) * dt; // Congela
     }
 
     const cf = document.getElementById('carga-fill'); cf.style.width = s.calor + '%'; cf.classList.toggle('critico', s.calor < 20);

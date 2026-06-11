@@ -5,7 +5,8 @@ export const GLOBAL = {
   pontuacaoFinal: 0,
   faseMaximaDB: 1, // Para enviar ao db
   morto: false,
-  faseObj: null
+  faseObj: null,
+  pesadelo: false
 };
 
 // Canvas references

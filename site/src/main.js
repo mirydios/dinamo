@@ -126,8 +126,20 @@ export function completarFase(tempoLongo) {
       "Corra. Aqueça-se nos barris se necessário. Não congele."
     ], prepararFase);
   } else if (GLOBAL.faseID === 4) {
-    GLOBAL.pontuacaoFinal = (6 * 1000) + Math.floor(GLOBAL.tempoAcumulado);
+    let base = (6 * 1000) + Math.floor(GLOBAL.tempoAcumulado);
+    GLOBAL.pontuacaoFinal = GLOBAL.pesadelo ? Math.floor(base * 1.5) : base;
+
+    // Salva a vitória para liberar pesadelo
+    localStorage.setItem('dinamo-win', '1');
+
     import('./core/api.js').then(({ enviarScore }) => {
+      // Se pesadelo, adiciona conquista
+      if(GLOBAL.pesadelo) {
+        let conqs = [];
+        try{ conqs = JSON.parse(localStorage.getItem('dinamo-achievements')||'[]'); }catch(e){}
+        if(!conqs.includes('💀')) { conqs.push('💀'); localStorage.setItem('dinamo-achievements', JSON.stringify(conqs)); }
+      }
+
       enviarScore(GLOBAL.pontuacaoFinal, 6, true, 4).then(dados => {
         mostrarFim('FUGA CONCLUÍDA', 'vitoria', 'A luz do sol... Você sobreviveu à Usina Nº 7.', GLOBAL.pontuacaoFinal, dados ? dados.posicao : null);
       });
@@ -142,7 +154,8 @@ export function triggerMorte(textoCausa) {
   document.getElementById('susto-aviso').className = 'on';
 
   const noc = GLOBAL.faseID === 1 ? GLOBAL.noiteDinamo : (GLOBAL.faseID === 2 ? 3 : (GLOBAL.faseID === 3 ? 4 : 5));
-  const pts = (noc * 1000) + Math.floor(GLOBAL.tempoAcumulado + GLOBAL.faseObj.S.t);
+  let pts = (noc * 1000) + Math.floor(GLOBAL.tempoAcumulado + GLOBAL.faseObj.S.t);
+  if (GLOBAL.pesadelo) pts = Math.floor(pts * 1.5);
 
   import('./core/api.js').then(({ enviarScore }) => {
     enviarScore(pts, noc, false, GLOBAL.faseMaximaDB).then(dados => {
@@ -203,7 +216,18 @@ function mostrarCutscene(linhas, callbackFim) {
   setTimeout(avancar, 800);
 }
 
-document.getElementById('btn-iniciar').addEventListener('click', iniciarPartida);
+document.getElementById('btn-iniciar').addEventListener('click', () => {
+  const inp = document.getElementById('input-apelido');
+  const apl = inp.value.trim().toUpperCase() || 'ANÔNIMO';
+  salvarApelido(apl);
+
+  const isPesadelo = document.getElementById('chk-pesadelo')?.checked;
+  GLOBAL.pesadelo = isPesadelo;
+
+  document.getElementById('tela-inicio').classList.add('hidden');
+  initAudio();
+  prepararFase();
+});
 document.getElementById('btn-ver-ranking').addEventListener('click', () => {
   document.getElementById('tela-ranking').classList.remove('hidden');
   import('./core/api.js').then(({ carregarRanking }) => carregarRanking('#ranking-full-lista', 20));
@@ -243,6 +267,19 @@ document.getElementById('btn-fechar-arquivos')?.addEventListener('click', () => 
 function init() {
   const cv = document.getElementById('game');
   resizeCanvas(cv, cv.getContext('2d'));
+  
+  if (localStorage.getItem('dinamo-win') === '1') {
+    document.getElementById('wrap-pesadelo').classList.remove('hidden');
+    document.getElementById('chk-pesadelo').addEventListener('change', (e) => {
+      if(e.target.checked) {
+        import('./core/audio.js').then(({ blip }) => blip(100, 0.4, 1.5, 'sawtooth'));
+        document.body.style.background = '#1a0505';
+      } else {
+        document.body.style.background = 'var(--preto)';
+      }
+    });
+  }
+
   import('./core/api.js').then(({ lerApelido, carregarRanking }) => {
     const apelidoSalvo = lerApelido();
     if (apelidoSalvo) document.getElementById('input-apelido').value = apelidoSalvo;

@@ -77,7 +77,7 @@ export const FaseCorredor = {
     document.getElementById('timer-val').textContent = Math.floor(s.t / 60) + ':' + String(Math.floor(s.t % 60)).padStart(2, '0');
 
     s.bombCooldown -= dt;
-    s.combustivel = Math.max(0, s.combustivel - 3 * dt);
+    s.combustivel = Math.max(0, s.combustivel - (GLOBAL.pesadelo ? 4.5 : 3) * dt);
     const cf = document.getElementById('carga-fill'); cf.style.width = s.combustivel + '%'; cf.classList.toggle('critico', s.combustivel < 20);
 
     if (!s.bombando) {
@@ -128,7 +128,7 @@ export const FaseCorredor = {
     ctx.translate(W / 2 - s.px * ts, H / 2 - s.py * ts);
 
     // -- RAYCASTING ---
-    const luzR = (s.combustivel / 100) * 4 + 2;
+    const luzR = ((s.combustivel / 100) * 4 + 2) * (GLOBAL.pesadelo ? 0.7 : 1);
     ctx.beginPath();
     ctx.moveTo(s.px * ts, s.py * ts);
     for (let a = 0; a < Math.PI * 2; a += Math.PI / 90) {
