@@ -1,172 +1,56 @@
-# 🕯️ DÍNAMO SOMBRIO
+# 🕯️ DÍNAMO SOMBRIO: FUGA
 
-> *Usina Nº 7 — Três Noites — 1923*
+> *Usina Nº 7 — Três Noites e a Fuga*
 
-Jogo de terror para navegador em arquivo HTML único. Gire as manivelas do velho dínamo para manter as luzes acesas — porque **aquilo que vive no escuro** só precisa de um momento de fraqueza para entrar.
+Jogo de terror para navegador em arquivo HTML único, agora acompanhado de um backend PostgreSQL + Node.js para ranking global de jogadores. Sobreviva à manutenção do velho dínamo e fuja pelos corredores escuros até o elevador.
 
-![Versão](https://img.shields.io/badge/versão-1.2-b87333?style=flat-square)
-![HTML](https://img.shields.io/badge/tecnologia-HTML%20único-ffb347?style=flat-square)
-![Offline](https://img.shields.io/badge/offline-sim-6e3b1f?style=flat-square)
+![Versão](https://img.shields.io/badge/versão-2.0-b87333?style=flat-square)
+![Stack](https://img.shields.io/badge/tecnologia-HTML%20+%20Express%20+%20PG-ffb347?style=flat-square)
 ![Mobile](https://img.shields.io/badge/mobile-primeira%20classe-8b0000?style=flat-square)
 
 ---
 
-## 🎮 Como Jogar
+## 🎮 Como Jogar (Fases)
 
-### Controles
+### Fase 1: O Dínamo
+- **Girar manivela:** `←` / `→` (ou `A` / `D`) alternando ou tocando nos cantos da tela.
+- **Trocar fusível:** Segure `E` (ou toque no botão de alerta) por 2,4s.
+Sobreviva às 3 noites girando a manivela para gerar luz e afastar a criatura. 
 
-| Ação | Teclado | Mobile |
-|---|---|---|
-| Girar manivela | `←` / `→` ou `A` / `D` (alternando) | Tocar alternando os dois lados da tela |
-| Trocar fusível | Segurar `E` por 2,4s | Segurar o botão na tela |
+### Fase 2: O Corredor Escuro
+- **Mover-se:** Setas do teclado ou `W` `A` `S` `D` (ou botões direcionais no mobile).
+- **Bombear Óleo:** Pressione `ESPAÇO` (ou toque no centro do d-pad) para colocar óleo na lanterna.
+Fuja pelos corredores da usina. Quanto mais escuro (menos óleo), mais rápido a criatura te alcança. Você não pode andar enquanto bombeia óleo.
 
-> **Dica de ritmo:** alternâncias com menos de 220ms rendem um bônus de 25% de força. Mantenha o ritmo!
+### Fase 3: O Poço do Elevador
+- **Girar manivela (subir):** `←` / `→` alternando ou tocando.
+- **Puxar freio:** Segure `E` para frear.
+Cuidado com a **tensão do cabo**. Se girar rápido demais, o cabo arrebenta. Se girar devagar demais, a gravidade e a criatura te alcançam pelo fosso.
 
-### Objetivo
-
-Sobreviva às **3 noites** na Usina Nº 7. Cada noite é mais longa e mais difícil que a anterior. O turno começa ao amanhecer.
-
----
-
-## ⚙️ Mecânicas
-
-### Carga & Luz
-A **carga** do dínamo (0–100%) controla a intensidade da luz. A luz decai constantemente — você precisa girar a manivela para recarregar. Se a carga cair abaixo de **35%**, a criatura começa a se aproximar.
-
-### A Criatura
-A **proximidade** (0–100%) representa o quanto ela está perto. Quando chega a 100%: jumpscare e derrota. Luz forte a faz recuar. Abaixo de 8% de proximidade, ela some.
-
-### Fusíveis
-Em intervalos aleatórios, um **fusível queima**. Com o fusível queimado, a manivela transfere apenas **18% da força normal**. Para trocar: segure `E` (ou o botão) por **2,4 segundos** sem soltar — mas enquanto troca, você não pode girar a manivela.
-
-### Superaquecimento
-Manter a carga acima de **78%** esquenta o dínamo. Quando a temperatura atinge 100%, o dínamo **trava** — a manivela emperra, vapor sai, a carga despenca. Ao destravar, a temperatura volta para 45%.
-
-### Sobrecargas
-Eventos aleatórios geram **arcos elétricos** que aumentam o decaimento da carga e reduzem a força da manivela pela metade por alguns segundos.
-
-### Progressão por Noite
-
-| Noite | Duração | Fusíveis | Velocidade da Criatura | Aquecimento |
-|---|---|---|---|---|
-| 1 | 3:00 | Raros (38–55s) | Lento | Moderado |
-| 2 | 3:30 | Frequentes (26–40s) | Médio | Alto |
-| 3 | 4:00 | Muito frequentes (18–30s) | Rápido | Máximo |
+> **Regra Crucial:** O jogo não possui continues! Uma morte em qualquer etapa reinicia seu turno inteiro a partir da Fase 1, mas sua pontuação será enviada ao Ranking Global no ponto de morte.
 
 ---
 
-## 📜 Narrativa
-
-Antes de cada noite, você encontra um bilhete deixado pelo **Operador R. Menezes** — o homem que trabalhou na Usina Nº 7 antes de você. Os três bilhetes revelam, em ordem crescente de desespero, o que aconteceu com ele.
-
----
-
-## ★ Achievements
-
-O jogo possui **8 conquistas** persistidas em `localStorage`, exibidas na tela inicial.
-
-| Ícone | Nome | Condição |
-|---|---|---|
-| 🕯️ | **SOBREVIVENTE** | Completar as 3 noites pela primeira vez |
-| ⚙️ | **VETERANO** | Completar as 3 noites 3 vezes |
-| ❄️ | **SANGUE FRIO** | Completar uma noite sem a temperatura passar de 60% |
-| ⚡ | **NO FIO** | Sobreviver 10 segundos contínuos com carga abaixo de 10% |
-| 🔩 | **MÃO RÁPIDA** | Manter ritmo acelerado (<220ms) por 30 segundos consecutivos |
-| 🔌 | **IMPROVISO** | Completar uma noite sem trocar o fusível |
-| 👁️ | **FACE DAS TREVAS** | Deixar a proximidade chegar a 90% e ainda assim sobreviver |
-| 🌅 | **ÚLTIMA LUZ** | Sobreviver à noite 3 |
+## 🏆 Ranking Global
+A v2.0 introduz o painel global de Operadores da Usina Nº 7! 
+A pontuação é unificada e calcula o tempo sobrevivente acrescido do bônus de noites completas. O ranking indica também a última `Fase Máxima` alcançada com ícones (⚙️ Dínamo, 🕯️ Corredor, ⛓️ Elevador).
 
 ---
 
-## 🔊 Áudio
+## 🐳 Infraestrutura e Deploy (Docker)
 
-Todo o áudio é **gerado em tempo real** via Web Audio API — nenhum arquivo de som externo.
+O projeto é mantido por 3 containers Docker:
+1. `postgres` (Banco de dados de ranking)
+2. `node-api` (API de submissão Express / Node.js)
+3. `nginx` (Frontend / site)
 
-- **Zumbido do dínamo** (oscilador sawtooth + filtro lowpass): volume e pitch seguem a carga
-- **Drone grave 34Hz**: volume segue a proximidade da criatura
-- **Passos posicionais** (StereoPanner): vindos do lado onde os olhos surgiram, acelerando com a proximidade
-- **Respiração da criatura** (ruído bandpass 380Hz + LFO): surge próximo de 25% e ofega mais rápido quando perto
-- **Efeitos de ação**: cliques de manivela, estalo de fusível, som de travamento, sting de morte, som de achievement
-
----
-
-## 🎨 Visual
-
-Renderizado inteiramente em **Canvas 2D**, sem bibliotecas externas.
-
-- Lâmpada pendurada com raio de luz proporcional à carga, com flicker constante
-- Dínamo com estator de 8 bobinas de cobre, rotor giratório e manivela
-- Caixa de fusíveis na parede (acende vermelho quando queima)
-- Olhos no escuro que avançam ao centro conforme a proximidade
-- Vinheta dinâmica, tremor de tela, faíscas, vapor e arcos elétricos
-- Brilho incandescente no corpo do dínamo quando quente
-
-**Paleta:**
-```
-Preto      #070605    Tungstênio  #ffb347
-Cobre      #b87333    Ferrugem    #6e3b1f
-Sangue     #8b0000    Calor       #ff5a2a
-```
-
----
-
-## 🐳 Deploy com Docker
-
-O projeto inclui infraestrutura pronta para deploy em VPS com Docker.
-
-### Pré-requisitos
-- Docker e Docker Compose instalados
-- Porta 8090 disponível
-
-### Subir o container
-
+Para iniciar todos localmente:
 ```bash
 git clone https://github.com/mirydios/dinamo.git
 cd dinamo
-docker compose up -d
+docker compose up -d --build
 ```
-
-O jogo estará disponível em: `http://seu-servidor:8090`
-
-### Configuração do container
-
-```yaml
-# docker-compose.yml (resumo)
-services:
-  dinamo:
-    image: nginx:1.27-alpine
-    ports:
-      - "8090:80"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 64M
-          cpus: "0.25"
-```
-
-Os limites de recursos são conservadores para conviver com outros serviços (n8n, PostgreSQL) na mesma VPS.
-
-### Traefik + HTTPS
-
-O `docker-compose.yml` inclui um bloco Traefik comentado para expor o jogo em um domínio com HTTPS automático. Consulte o arquivo [README-deploy.md](./README-deploy.md) para instruções detalhadas.
-
----
-
-## 🗂️ Estrutura do Projeto
-
-```
-dinamo/
-├── site/
-│   └── index.html              # O jogo completo (HTML único, ~33KB)
-├── Dockerfile                  # Imagem nginx:1.27-alpine
-├── docker-compose.yml          # Serviço + limites de recurso + bloco Traefik
-├── nginx.conf                  # Gzip, headers de segurança, cache
-├── instrucoes-projeto-dinamo.md# Memória do projeto (estado, roadmap, changelog)
-└── README.md                   # Este arquivo
-```
-
-> O jogo é **um único arquivo HTML** sem dependências externas. Funciona offline, em qualquer navegador moderno, direto com duplo clique.
+Acesse `http://localhost:8090` (ou sua URL de produção) no navegador. O Docker rodará automaticamente a seed/migration no banco de dados.
 
 ---
 
@@ -174,35 +58,13 @@ dinamo/
 
 | Versão | Destaques |
 |---|---|
-| **v1.3** | Chuva procedural + gotas visuais; trovões + relâmpago; epílogo cinematográfico typewriter; 8 eventos aleatórios de susto |
-| **v1.2** | Bilhetes narrativos do Operador R. Menezes; 8 achievements com toasts; balanceamento fino do superaquecimento |
-| **v1.1** | Passos e respiração posicionais (StereoPanner); recordes por noite em localStorage |
-| **v1.0** | 3 noites progressivas; fusíveis; superaquecimento; sobrecargas; container Docker |
-| **v0.1** | Protótipo: manivela, carga, luz, criatura, 1 noite |
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Sala com profundidade visual (paredes, janelas, canos no canvas)
-- [ ] Silhueta da criatura em alta proximidade
-- [ ] Modo Hard: sem HUD (perceber a carga apenas pela intensidade da luz)
-- [ ] Objeto coletável por noite (fragmentos da história do Menezes)
-- [ ] Modo cooperativo local (dois jogadores, mesmo teclado)
-- [ ] Segunda sala / gerador auxiliar que precisa ser religado no escuro
-- [ ] Balanceamento contínuo baseado em feedback real de jogo
-
----
-
-## 🛠️ Convenções de Código
-
-- **Arquivo único** — vanilla JS, IIFE, sem frameworks ou build tools
-- **Estado central** no objeto `S`; parâmetros de dificuldade no array `NOITES`
-- **Texto do jogo** em pt-BR; variáveis e comentários em pt-BR
-- `prefers-reduced-motion` respeitado nas animações CSS
+| **v2.0** | Fuga (Fase 2: Corredor e Fase 3: Elevador), Arquitetura Modular de Fases, Banco de Dados PostgreSQL, Ranking Global na tela inicial |
+| **v1.4** | Integração Node.js + Express para Pontuações Globais |
+| **v1.3** | Chuva procedural, trovões, relâmpago; eventos de susto aleatórios |
+| **v1.2** | Bilhetes narrativos do Operador; achievements com toasts |
+| **v1.0** | 3 noites do Dínamo; fusíveis; superaquecimento |
 
 ---
 
 ## 📄 Licença
-
 Projeto pessoal. Uso e modificação livres para fins não comerciais.
