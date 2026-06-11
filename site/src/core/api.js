@@ -14,10 +14,12 @@ export function apelidoAtual() {
 
 export async function enviarScore(pontuacao, noitesCompletas, vitoria, faseMaxima) {
   try {
+    let conqs = [];
+    try { conqs = JSON.parse(localStorage.getItem('dinamo-achievements')||'[]'); } catch(e){}
     const resp = await fetch('/api/score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apelido: apelidoAtual(), pontuacao, noites_completas: noitesCompletas, vitoria, fase_maxima: faseMaxima })
+      body: JSON.stringify({ apelido: apelidoAtual(), pontuacao, noites_completas: noitesCompletas, vitoria, fase_maxima: faseMaxima, conquistas: conqs })
     });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     return await resp.json();
@@ -38,15 +40,17 @@ export async function carregarRanking(seletor, limit = 10) {
 function renderRanking(el, dados) {
   if (!dados || dados.length === 0) { el.innerHTML = '<div class="rank-vazio">NENHUM OPERADOR REGISTRADO</div>'; return; }
   const medalhas = ['rank-ouro', 'rank-prata', 'rank-bronze'];
-  const iconesFase = { 1: '⚙️ Dínamo', 2: '🕯️ Corredor', 3: '⛓️ Elevador' };
+  const iconesFase = { 1: '⚙️ Dínamo', 2: '🕯️ Corredor', 3: '⛓️ Elevador', 4: '❄️ Exterior' };
   el.innerHTML = dados.map((r, i) => {
     const pos = r.posicao || (i + 1);
     const cls = medalhas[i] || '';
     const vCls = r.vitoria ? ' vitoria' : '';
     const icone = iconesFase[r.fase_maxima] || '⚙️';
+    const numConq = r.conquistas ? (r.conquistas.split(',').filter(x=>x).length) : 0;
+    const conqBadge = numConq > 0 ? ` <span style="color:#d8c9a3;font-size:0.8em">★${numConq}</span>` : '';
     return `<div class="rank-row ${cls}">
       <span class="rank-pos">#${pos}</span>
-      <span class="rank-nome">${escHtml(r.apelido)}</span>
+      <span class="rank-nome">${escHtml(r.apelido)}${conqBadge}</span>
       <span class="rank-fase${vCls}">${icone}</span>
       <span class="rank-pts">${r.pontuacao.toLocaleString('pt-BR')} pts</span>
     </div>`;

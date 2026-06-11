@@ -21,10 +21,28 @@ export const FaseCorredor = {
     const { W, H } = CanvasInfo;
     this.S = {
       t: 0, px: 1.5, py: 1.5, cx: 1.5, cy: 7.5, combustivel: 100,
-      bombando: false, bombCooldown: 0, grid: LABIRINTO,
-      tileSize: Math.min(W / 15, H / 9), tremor: 0, calcPath: 0, path: []
+      bombando: false, bombCooldown: 0, grid: [...LABIRINTO],
+      tileSize: Math.min(W / 15, H / 9), tremor: 0, calcPath: 0, path: [],
+      paginasEncontradas: 0, totalPaginas: 3
     };
+    this.espalharPaginas();
     this.configHUD();
+  },
+  espalharPaginas() {
+    let vazios = [];
+    for(let r=1; r<this.S.grid.length-1; r++){
+      for(let c=1; c<this.S.grid[0].length-1; c++){
+        if(this.S.grid[r][c] === '0' && (r>3 || c>3)) vazios.push({r,c});
+      }
+    }
+    for(let i=0; i<this.S.totalPaginas; i++){
+      if(vazios.length===0) break;
+      const idx = Math.floor(Math.random()*vazios.length);
+      const {r,c} = vazios.splice(idx,1)[0];
+      let row = this.S.grid[r].split('');
+      row[c] = 'P';
+      this.S.grid[r] = row.join('');
+    }
   },
   configHUD() {
     document.getElementById('lbl-carga').textContent = '🛢️ ÓLEO (ESPAÇO)';
@@ -78,6 +96,14 @@ export const FaseCorredor = {
     if (s.grid[row] && s.grid[row][col] === 'E') {
       completarFase(s.t); return;
     }
+    if (s.grid[row] && s.grid[row][col] === 'P') {
+      s.paginasEncontradas++;
+      blip(600, 0.1, 0.2, 'sine'); blip(800, 0.15, 0.2, 'sine');
+      let strRow = s.grid[row].split(''); strRow[col] = '0'; s.grid[row] = strRow.join('');
+      // Adiciona na DOM globalmente
+      let pgs = parseInt(localStorage.getItem('dinamo-paginas')||'0') + 1;
+      localStorage.setItem('dinamo-paginas', pgs);
+    }
 
     s.calcPath -= dt;
     if (s.calcPath <= 0) {
@@ -101,17 +127,38 @@ export const FaseCorredor = {
     ctx.save();
     ctx.translate(W / 2 - s.px * ts, H / 2 - s.py * ts);
 
+    // -- RAYCASTING ---
+    const luzR = (s.combustivel / 100) * 4 + 2;
+    ctx.beginPath();
+    ctx.moveTo(s.px * ts, s.py * ts);
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 90) {
+      let dx = Math.cos(a), dy = Math.sin(a);
+      let rx = s.px, ry = s.py;
+      let hit = false;
+      for (let step = 0; step < luzR * 4; step++) {
+        rx += dx * 0.25; ry += dy * 0.25;
+        const c = Math.floor(rx), r = Math.floor(ry);
+        if (r < 0 || r >= s.grid.length || c < 0 || c >= s.grid[0].length || s.grid[r][c] === '1') {
+          ctx.lineTo(rx * ts, ry * ts);
+          hit = true; break;
+        }
+      }
+      if (!hit) ctx.lineTo(rx * ts, ry * ts);
+    }
+    ctx.closePath();
+    ctx.clip(); // APENAS desenha o que está dentro do polígono de luz
+    // -----------------
+
     for (let r = 0; r < s.grid.length; r++) {
       for (let c = 0; c < s.grid[0].length; c++) {
-        const distP = Math.hypot(c + .5 - s.px, r + .5 - s.py);
-        const luzR = (s.combustivel / 100) * 4 + 2;
-        if (distP > luzR + 1) continue;
-
         if (s.grid[r][c] === '1') {
           ctx.fillStyle = '#14110d'; ctx.fillRect(c * ts, r * ts, ts + 1, ts + 1);
           ctx.strokeStyle = '#2a2218'; ctx.strokeRect(c * ts, r * ts, ts, ts);
         } else if (s.grid[r][c] === 'E') {
           ctx.fillStyle = '#004400'; ctx.fillRect(c * ts, r * ts, ts, ts);
+        } else if (s.grid[r][c] === 'P') {
+          ctx.fillStyle = '#d8c9a3'; ctx.fillRect(c * ts + ts*.3, r * ts + ts*.3, ts*.4, ts*.5);
+          ctx.strokeStyle = '#b87333'; ctx.strokeRect(c * ts + ts*.3, r * ts + ts*.3, ts*.4, ts*.5);
         }
       }
     }
@@ -120,7 +167,6 @@ export const FaseCorredor = {
     ctx.beginPath(); ctx.arc(s.px * ts, s.py * ts, ts * 0.25, 0, 7); ctx.fill();
 
     const distC = Math.hypot(s.cx - s.px, s.cy - s.py);
-    const luzR = (s.combustivel / 100) * 4 + 2;
     if (distC < luzR) {
       ctx.fillStyle = 'white';
       ctx.beginPath(); ctx.arc(s.cx * ts - 4, s.cy * ts, 3, 0, 7); ctx.fill();

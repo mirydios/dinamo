@@ -3,6 +3,7 @@ import { initAudio, somSusto } from './core/audio.js';
 import { FaseDinamo } from './fases/faseDinamo.js';
 import { FaseCorredor } from './fases/faseCorredor.js';
 import { FaseElevador } from './fases/faseElevador.js';
+import { FaseExterior } from './fases/faseExterior.js';
 import { carregarRanking as cRank } from './core/api.js';
 
 let ultimo = performance.now();
@@ -68,6 +69,9 @@ function prepararFase() {
   } else if (GLOBAL.faseID === 3) {
     document.getElementById('fase-titulo').textContent = 'POÇO DO ELEVADOR';
     document.getElementById('fase-sub').textContent = 'Suba. Não pare. Não olhe para baixo.';
+  } else if (GLOBAL.faseID === 4) {
+    document.getElementById('fase-titulo').textContent = 'NEVASCA';
+    document.getElementById('fase-sub').textContent = 'O portão da usina. Não congele.';
   }
 }
 
@@ -78,6 +82,7 @@ document.getElementById('btn-fase').addEventListener('click', () => {
   if (GLOBAL.faseID === 1) GLOBAL.faseObj = FaseDinamo;
   else if (GLOBAL.faseID === 2) GLOBAL.faseObj = FaseCorredor;
   else if (GLOBAL.faseID === 3) GLOBAL.faseObj = FaseElevador;
+  else if (GLOBAL.faseID === 4) GLOBAL.faseObj = FaseExterior;
 
   GLOBAL.faseObj.iniciar();
 });
@@ -113,10 +118,18 @@ export function completarFase(tempoLongo) {
       "Cuidado com a tensão do cabo."
     ], prepararFase);
   } else if (GLOBAL.faseID === 3) {
-    GLOBAL.pontuacaoFinal = (5 * 1000) + Math.floor(GLOBAL.tempoAcumulado);
+    GLOBAL.faseID = 4;
+    mostrarCutscene([
+      "O elevador tranca no topo. Você chuta as portas.",
+      "A neve entra com o vento cortante.",
+      "O portão da usina está no fim da rua principal.",
+      "Corra. Aqueça-se nos barris se necessário. Não congele."
+    ], prepararFase);
+  } else if (GLOBAL.faseID === 4) {
+    GLOBAL.pontuacaoFinal = (6 * 1000) + Math.floor(GLOBAL.tempoAcumulado);
     import('./core/api.js').then(({ enviarScore }) => {
-      enviarScore(GLOBAL.pontuacaoFinal, 5, true, 3).then(dados => {
-        mostrarFim('FUGA CONCLUÍDA', 'vitoria', 'A luz do sol. Você sobreviveu à Usina Nº 7.', GLOBAL.pontuacaoFinal, dados ? dados.posicao : null);
+      enviarScore(GLOBAL.pontuacaoFinal, 6, true, 4).then(dados => {
+        mostrarFim('FUGA CONCLUÍDA', 'vitoria', 'A luz do sol... Você sobreviveu à Usina Nº 7.', GLOBAL.pontuacaoFinal, dados ? dados.posicao : null);
       });
     });
   }
@@ -128,7 +141,7 @@ export function triggerMorte(textoCausa) {
   document.getElementById('susto-aviso').textContent = 'PEGO';
   document.getElementById('susto-aviso').className = 'on';
 
-  const noc = GLOBAL.faseID === 1 ? GLOBAL.noiteDinamo : (GLOBAL.faseID === 2 ? 3 : 4);
+  const noc = GLOBAL.faseID === 1 ? GLOBAL.noiteDinamo : (GLOBAL.faseID === 2 ? 3 : (GLOBAL.faseID === 3 ? 4 : 5));
   const pts = (noc * 1000) + Math.floor(GLOBAL.tempoAcumulado + GLOBAL.faseObj.S.t);
 
   import('./core/api.js').then(({ enviarScore }) => {
@@ -197,6 +210,36 @@ document.getElementById('btn-ver-ranking').addEventListener('click', () => {
 });
 document.getElementById('btn-fechar-ranking').addEventListener('click', () => { document.getElementById('tela-ranking').classList.add('hidden'); });
 
+const PÁGINAS_TEXTO = [
+  "23 de Outubro. O gerador falhou de novo. As sombras pareciam se mover. Fiquei no escuro por 5 minutos, ouvi passos. Não eram os meus.",
+  "25 de Outubro. Eu tranquei o elevador. Ele não pode subir. Só preciso manter o dínamo girando. O combustível está no fim.",
+  "27 de Outubro. Não adianta mais. Ele aprendeu a abrir o alçapão do elevador. Fique na luz. Pelo amor de Deus, fique na luz."
+];
+
+function atualizarBtnArquivos() {
+  const pgs = parseInt(localStorage.getItem('dinamo-paginas')||'0');
+  const btn = document.getElementById('btn-ver-arquivos');
+  if(btn) btn.textContent = `ARQUIVOS (${Math.min(pgs,3)}/3)`;
+}
+
+document.getElementById('btn-ver-arquivos')?.addEventListener('click', () => {
+  const pgs = parseInt(localStorage.getItem('dinamo-paginas')||'0');
+  document.getElementById('arquivos-sub').textContent = `${Math.min(pgs,3)}/3 PÁGINAS ENCONTRADAS NO CORREDOR`;
+  const lista = document.getElementById('lista-arquivos');
+  lista.innerHTML = '';
+  for(let i=0; i<3; i++){
+    if(i < pgs) {
+      lista.innerHTML += `<div class="bilhete"><span class="bil-data">PÁGINA ${i+1}</span>${PÁGINAS_TEXTO[i]}</div>`;
+    } else {
+      lista.innerHTML += `<div class="bilhete" style="opacity:0.3; filter:blur(2px);">Página não encontrada...</div>`;
+    }
+  }
+  document.getElementById('tela-arquivos').classList.remove('hidden');
+});
+document.getElementById('btn-fechar-arquivos')?.addEventListener('click', () => {
+  document.getElementById('tela-arquivos').classList.add('hidden');
+});
+
 function init() {
   const cv = document.getElementById('game');
   resizeCanvas(cv, cv.getContext('2d'));
@@ -205,6 +248,8 @@ function init() {
     if (apelidoSalvo) document.getElementById('input-apelido').value = apelidoSalvo;
     carregarRanking('#ranking-lista', 10);
   });
+  atualizarBtnArquivos();
+  setInterval(atualizarBtnArquivos, 1000);
   requestAnimationFrame(loop);
 }
 

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS pontuacoes (
   noites_completas  SMALLINT      NOT NULL DEFAULT 0 CHECK (noites_completas >= 0),
   vitoria           BOOLEAN       NOT NULL DEFAULT FALSE,
   fase_maxima       SMALLINT      NOT NULL DEFAULT 1 CHECK (fase_maxima >= 1),
+  conquistas        TEXT          NOT NULL DEFAULT '',
   criado_em         TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
@@ -22,6 +23,12 @@ BEGIN
     WHERE table_name='pontuacoes' AND column_name='fase_maxima'
   ) THEN
     ALTER TABLE pontuacoes ADD COLUMN fase_maxima SMALLINT NOT NULL DEFAULT 1;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='pontuacoes' AND column_name='conquistas'
+  ) THEN
+    ALTER TABLE pontuacoes ADD COLUMN conquistas TEXT NOT NULL DEFAULT '';
   END IF;
 END$$;
 

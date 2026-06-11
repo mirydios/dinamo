@@ -6,7 +6,7 @@
 <title>DÍNAMO SOMBRIO: FUGA</title>
 <link rel="stylesheet" href="/src/style.css">
 </head>
-<body>
+<body class="crt">
 <canvas id="game"></canvas>
 
 <div id="hud" class="hidden">
@@ -58,7 +58,8 @@
     </div>
 
     <button id="btn-iniciar">ENTRAR NA USINA</button>
-    <button class="btn-sec" id="btn-ver-ranking">VER RANKING COMPLETO</button>
+    <button id="btn-ver-ranking" class="btn-sec">RANKING GLOBAL</button>
+    <button id="btn-ver-arquivos" class="btn-sec">ARQUIVOS (0/3)</button>
 
     <div class="ranking-box">
       <div class="ranking-header">
@@ -67,6 +68,16 @@
       </div>
       <div id="ranking-lista"><div class="rank-loading">CARREGANDO...</div></div>
     </div>
+  </div>
+</div>
+
+<!-- ===== TELA ARQUIVOS ===== -->
+<div id="tela-arquivos" class="screen hidden">
+  <div class="screen-inner">
+    <h2>DIÁRIO DO MENEZES</h2>
+    <div class="sub" id="arquivos-sub">0/3 PÁGINAS ENCONTRADAS NO CORREDOR</div>
+    <div id="lista-arquivos" style="width:100%; max-width:500px; margin-top:20px;"></div>
+    <button id="btn-fechar-arquivos" class="btn-sec" style="margin-top:30px;">VOLTAR</button>
   </div>
 </div>
 

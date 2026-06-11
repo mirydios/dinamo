@@ -58,12 +58,8 @@ app.get('/api/ranking', async (req, res) => {
     const limit = Math.min(toInt(req.query.limit, 20, 1), 50);
     const { rows } = await pool.query(
       `SELECT
-         ROW_NUMBER() OVER (ORDER BY fase_maxima DESC, pontuacao DESC, criado_em ASC) AS posicao,
-         apelido,
-         pontuacao,
-         noites_completas,
-         vitoria,
-         fase_maxima,
+         apelido, pontuacao, noites_completas, vitoria, fase_maxima, conquistas,
+         RANK() OVER (ORDER BY fase_maxima DESC, pontuacao DESC, criado_em ASC) as posicao,
          TO_CHAR(criado_em AT TIME ZONE 'America/Sao_Paulo', 'DD/MM/YY') AS data
        FROM pontuacoes
        ORDER BY fase_maxima DESC, pontuacao DESC, criado_em ASC
@@ -78,20 +74,25 @@ app.get('/api/ranking', async (req, res) => {
 });
 
 // POST /api/score
-// Body: { apelido, pontuacao, noites_completas, vitoria, fase_maxima }
+// Body: { apelido, pontuacao, noites_completas, vitoria, fase_maxima, conquistas }
 app.post('/api/score', async (req, res) => {
   try {
-    const apelido          = sanitizeApelido(req.body.apelido);
-    const pontuacao        = toInt(req.body.pontuacao, 0, 0);
-    const noites_completas = toInt(req.body.noites_completas, 0, 0);
-    const vitoria          = Boolean(req.body.vitoria);
-    const fase_maxima      = Math.max(1, Math.min(3, toInt(req.body.fase_maxima, 1, 1)));
+    const { apelido, pontuacao, noites_completas, vitoria, fase_maxima, conquistas } = req.body;
+    if (typeof pontuacao !== 'number' || pontuacao < 0) {
+      return res.status(400).json({ ok: false, error: 'pontuacao invalida' });
+    }
+
+    const apelidoSanitizado = sanitizeApelido(apelido);
+    const noc = toInt(noites_completas, 0);
+    const v = !!vitoria;
+    const fmax = toInt(fase_maxima, 1, 1);
+    const conqStr = (Array.isArray(conquistas) ? conquistas : []).slice(0,10).join(',');
 
     const insert = await pool.query(
-      `INSERT INTO pontuacoes (apelido, pontuacao, noites_completas, vitoria, fase_maxima)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, apelido, pontuacao, noites_completas, vitoria, fase_maxima`,
-      [apelido, pontuacao, noites_completas, vitoria, fase_maxima]
+      `INSERT INTO pontuacoes (apelido, pontuacao, noites_completas, vitoria, fase_maxima, conquistas)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, apelido, pontuacao, noites_completas, vitoria, fase_maxima, conquistas`,
+      [apelidoSanitizado, pontuacao, noc, v, fmax, conqStr]
     );
     const registro = insert.rows[0];
 

@@ -194,3 +194,17 @@
   #fim-titulo.vitoria{color:var(--tungstenio);text-shadow:0 0 30px rgba(255,179,71,.6);}
   #fim-texto{max-width:480px;line-height:1.8;margin-bottom:14px;color:#9a8862;font-size:clamp(12px,2.8vw,15px);}
   #fim-rank-posicao{font-size:clamp(13px,2.8vw,16px);letter-spacing:.2em;color:var(--tungstenio);margin-bottom:6px;min-height:1.2em;}
+
+  /* ---- filtros imersão ---- */
+  .crt::before {
+    content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 900; background-size: 100% 2px, 3px 100%; pointer-events: none;
+  }
+  .crt::after {
+    content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
+    opacity: 0.15; z-index: 900; pointer-events: none;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY3jP4PgfAAWgA4I9c+iQAAAAAElFTkSuQmCC);
+    animation: noise 0.2s infinite;
+  }
+  @keyframes noise { 0% { background-position: 0 0; } 100% { background-position: 100% 100%; } }
