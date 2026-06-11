@@ -4,8 +4,8 @@
 
 Jogo de terror para navegador em arquivo HTML único, agora acompanhado de um backend PostgreSQL + Node.js para ranking global de jogadores. Sobreviva à manutenção do velho dínamo e fuja pelos corredores escuros até o elevador.
 
-![Versão](https://img.shields.io/badge/versão-2.0-b87333?style=flat-square)
-![Stack](https://img.shields.io/badge/tecnologia-HTML%20+%20Express%20+%20PG-ffb347?style=flat-square)
+![Versão](https://img.shields.io/badge/versão-2.5-b87333?style=flat-square)
+![Stack](https://img.shields.io/badge/tecnologia-Vite%20+%20Express%20+%20PG-ffb347?style=flat-square)
 ![Mobile](https://img.shields.io/badge/mobile-primeira%20classe-8b0000?style=flat-square)
 
 ---
@@ -27,13 +27,17 @@ Fuja pelos corredores da usina. Quanto mais escuro (menos óleo), mais rápido a
 - **Puxar freio:** Segure `E` para frear.
 Cuidado com a **tensão do cabo**. Se girar rápido demais, o cabo arrebenta. Se girar devagar demais, a gravidade e a criatura te alcançam pelo fosso.
 
+### Fase 4: O Exterior (Nevasca)
+- **Movimentação:** Setas ou WASD. Vertical controla a velocidade, horizontal desvia de obstáculos.
+Sobreviva à hipotermia e fuja da criatura correndo na neve. Pare perto dos **barris de fogo** para recuperar o calor do corpo, mas cuidado com o que vem atrás.
+
 > **Regra Crucial:** O jogo não possui continues! Uma morte em qualquer etapa reinicia seu turno inteiro a partir da Fase 1, mas sua pontuação será enviada ao Ranking Global no ponto de morte.
 
 ---
 
-## 🏆 Ranking Global
-A v2.0 introduz o painel global de Operadores da Usina Nº 7! 
-A pontuação é unificada e calcula o tempo sobrevivente acrescido do bônus de noites completas. O ranking indica também a última `Fase Máxima` alcançada com ícones (⚙️ Dínamo, 🕯️ Corredor, ⛓️ Elevador).
+## 🏆 Ranking Global e Conquistas
+A v2.5 traz o painel global de Operadores da Usina Nº 7 com integração direta às suas conquistas.
+A pontuação calcula o tempo sobrevivente acrescido do bônus de fases completas. O ranking indica também a última `Fase Máxima` alcançada com ícones (⚙️ Dínamo, 🕯️ Corredor, ⛓️ Elevador, ❄️ Exterior) e um emblema contabilizando quantas conquistas (e páginas secretas) o jogador encontrou pelo labirinto.
 
 ---
 
@@ -50,7 +54,7 @@ git clone https://github.com/mirydios/dinamo.git
 cd dinamo
 docker compose up -d --build
 ```
-Acesse `http://localhost:8090` (ou sua URL de produção) no navegador. O Docker rodará automaticamente a seed/migration no banco de dados.
+Acesse `http://localhost:8095` (ou sua URL de produção) no navegador. O Docker rodará automaticamente o build do **Vite** no frontend e a seed/migration no banco de dados.
 
 ---
 
@@ -58,7 +62,8 @@ Acesse `http://localhost:8090` (ou sua URL de produção) no navegador. O Docker
 
 | Versão | Destaques |
 |---|---|
-| **v2.0** | Fuga (Fase 2: Corredor e Fase 3: Elevador), Arquitetura Modular de Fases, Banco de Dados PostgreSQL, Ranking Global na tela inicial |
+| **v2.5** | Fase 4 (Exterior Congelado e mecânica de Hipotermia), Raycasting no Corredor, Filtros CRT, Colecionáveis (Lore), Sync de conquistas no Banco de Dados |
+| **v2.0** | Fuga (Fase 2: Corredor e Fase 3: Elevador), Arquitetura Modular (Vite/ESM), Banco de Dados PostgreSQL, Ranking Global na tela inicial |
 | **v1.4** | Integração Node.js + Express para Pontuações Globais |
 | **v1.3** | Chuva procedural, trovões, relâmpago; eventos de susto aleatórios |
 | **v1.2** | Bilhetes narrativos do Operador; achievements com toasts |
