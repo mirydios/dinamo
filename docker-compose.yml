@@ -56,9 +56,9 @@ services:
     container_name: dinamo-sombrio
     restart: unless-stopped
     ports:
-      # Acesso direto: http://SEU_IP:8090
-      # Troque 8090 se a porta já estiver em uso na sua VPS
-      - "8090:80"
+      # Acesso direto: http://SEU_IP:8095
+      # Troque 8095 se a porta já estiver em uso na sua VPS
+      - "8095:80"
     depends_on:
       - api
     networks:

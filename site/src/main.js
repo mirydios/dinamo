@@ -1,10 +1,10 @@
-import { GLOBAL, resizeCanvas, CanvasInfo, salvarApelido, lerApelido, enviarScore, carregarRanking } from './core/global.js';
+import { GLOBAL, resizeCanvas, CanvasInfo } from './core/global.js';
 import { initAudio, somSusto } from './core/audio.js';
 import { FaseDinamo } from './fases/faseDinamo.js';
 import { FaseCorredor } from './fases/faseCorredor.js';
 import { FaseElevador } from './fases/faseElevador.js';
 import { FaseExterior } from './fases/faseExterior.js';
-import { carregarRanking as cRank } from './core/api.js';
+import { carregarRanking as cRank, salvarApelido, lerApelido, enviarScore, carregarRanking } from './core/api.js';
 
 let ultimo = performance.now();
 
