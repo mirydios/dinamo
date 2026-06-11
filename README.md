@@ -174,6 +174,7 @@ dinamo/
 
 | Versão | Destaques |
 |---|---|
+| **v1.3** | Chuva procedural + gotas visuais; trovões + relâmpago; epílogo cinematográfico typewriter; 8 eventos aleatórios de susto |
 | **v1.2** | Bilhetes narrativos do Operador R. Menezes; 8 achievements com toasts; balanceamento fino do superaquecimento |
 | **v1.1** | Passos e respiração posicionais (StereoPanner); recordes por noite em localStorage |
 | **v1.0** | 3 noites progressivas; fusíveis; superaquecimento; sobrecargas; container Docker |
@@ -183,10 +184,13 @@ dinamo/
 
 ## 🗺️ Roadmap
 
-- [ ] Segunda sala / gerador auxiliar que precisa ser religado no escuro
+- [ ] Sala com profundidade visual (paredes, janelas, canos no canvas)
+- [ ] Silhueta da criatura em alta proximidade
+- [ ] Modo Hard: sem HUD (perceber a carga apenas pela intensidade da luz)
+- [ ] Objeto coletável por noite (fragmentos da história do Menezes)
 - [ ] Modo cooperativo local (dois jogadores, mesmo teclado)
+- [ ] Segunda sala / gerador auxiliar que precisa ser religado no escuro
 - [ ] Balanceamento contínuo baseado em feedback real de jogo
-- [ ] Modo online simples (WebSocket + backend Node no mesmo compose)
 
 ---
 

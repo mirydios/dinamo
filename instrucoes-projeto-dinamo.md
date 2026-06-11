@@ -21,7 +21,7 @@ concluída, atualizar a seção "Estado atual" e o "Changelog".
 - Mobile é cidadão de primeira classe: toda mecânica nova precisa funcionar
   com toque, não só teclado.
 
-## Estado atual — v1.2 (narrativa + achievements)
+## Estado atual — v1.3 (atmosfera + epílogo + sustos)
 
 ### Mecânicas implementadas
 1. **Manivela por alternância**: ← → (ou A/D) no teclado; no celular, tocar
@@ -80,18 +80,20 @@ concluída, atualizar a seção "Estado atual" e o "Changelog".
 ### Próximos passos prováveis
 - [x] Sons de passos/respiração posicionais quando a criatura se aproxima. (v1.1)
 - [x] Tela de recordes (melhor tempo por noite) — localStorage. (v1.1)
-- [x] Balanceamento fino do superaquecimento — v1.2: zona perigosa em 78%
-      (era 82%), resfriamento 20/s (era 18/s), travaDur noite 1 reduzida
-      para 3.0s. (v1.2)
+- [x] Balanceamento fino do superaquecimento — v1.2. (v1.2)
 - [x] Narrativa entre noites (bilhetes do operador anterior). (v1.2)
-- [x] Achievements / conquistas — 8 achievements com toasts e grid na
-      tela inicial; localStorage. (v1.2)
+- [x] Achievements / conquistas — 8 achievements. (v1.2)
+- [x] Chuva procedural + trovões + relâmpago visual. (v1.3)
+- [x] Epílogo cinematográfico com typewriter após vitória. (v1.3)
+- [x] Eventos aleatórios de susto (texto + áudio, sem impacto mecânico). (v1.3)
 
 ### Candidatas (discutir antes de implementar)
+- [ ] Sala com profundidade visual (paredes, janelas, canos no canvas).
+- [ ] Silhueta da criatura em alta proximidade.
+- [ ] Modo Hard: sem HUD (perceber carga só pela luz).
 - [ ] Modo cooperativo local: dois dínamos, dois jogadores no mesmo teclado.
-- [ ] Modo online simples (WebSocket) — exigiria sair do HTML único; avaliar
-      um backend Node leve no mesmo compose.
 - [ ] Segunda sala / gerador auxiliar que precisa ser religado no escuro.
+- [ ] Objeto coletável por noite (fragmentos da história do Menezes).
 - [ ] Balanceamento contínuo baseado em feedback real de jogo.
 
 ## Convenções de código
@@ -105,13 +107,14 @@ concluída, atualizar a seção "Estado atual" e o "Changelog".
 - **v1.0** — 3 noites, fusíveis, superaquecimento, sobrecargas, vapor/calor
   visual, HUD com 2 medidores, container Docker completo.
 - **v1.1** — passos e respiração posicionais da criatura (StereoPanner,
-  com fallback); recordes por noite + turnos completos em localStorage,
-  exibidos nas telas de início, noite e derrota; primeiro passe de
-  balanceamento do superaquecimento (resfriamento 15→18/s, noite 3
-  calorTaxa 26→24).
-- **v1.2** — bilhetes narrativos do Operador R. Menezes exibidos antes de
-  cada noite (caixa sépia com papel envelhecido); sistema de 8 achievements
-  com toasts slide-in e grid de conquistas na tela inicial; balanceamento
-  fino do superaquecimento (zona perigosa 82→78%, resfriamento 18→20/s,
-  travaDur noite 1 reduzida 3.5→3.0s); chave localStorage migrada para
-  v2 (retrocompatível com reset limpo).
+  com fallback); recordes por noite + turnos completos em localStorage.
+- **v1.2** — bilhetes narrativos do Operador R. Menezes; sistema de 8
+  achievements com toasts slide-in; balanceamento do superaquecimento
+  (zona perigosa 82→78%, resfriamento 18→20/s, travaDur noite 1 3.5→3.0s).
+- **v1.3** — chuva procedural contínua (ruído filtrado, Web Audio API) com
+  gotas visuais no canvas; trovões aleatórios (baixo tonal + burst de ruído)
+  com 40% de chance de relâmpago (flash branco que ilumina a cena); epílogo
+  cinematográfico typewriter com 16 linhas após vencer as 3 noites, revelando
+  o destino do Operador Menezes; 8 eventos aleatórios de susto (porta, risca,
+  rangido, gemido, queda, respiração) com áudio dedicado e texto centralizado
+  — sem impacto mecânico, só atmosfera.
