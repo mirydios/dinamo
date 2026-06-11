@@ -1,0 +1,34 @@
+services:
+  dinamo-sombrio:
+    build: .
+    image: dinamo-sombrio:1.0
+    container_name: dinamo-sombrio
+    restart: unless-stopped
+    ports:
+      # Acesso direto: http://SEU_IP:8090
+      # Troque 8090 se a porta já estiver em uso na sua VPS
+      - "8090:80"
+    # Limites para conviver bem com n8n, Postgres etc. na mesma VPS
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.25"
+
+    # ------------------------------------------------------------------
+    # OPCIONAL: se você usa Traefik como proxy reverso na VPS,
+    # remova o bloco "ports" acima e descomente as linhas abaixo,
+    # ajustando o domínio e o nome da rede do seu Traefik.
+    # ------------------------------------------------------------------
+    # networks:
+    #   - traefik
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.dinamo.rule=Host(`jogo.seudominio.com.br`)"
+    #   - "traefik.http.routers.dinamo.entrypoints=websecure"
+    #   - "traefik.http.routers.dinamo.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.dinamo.loadbalancer.server.port=80"
+
+# networks:
+#   traefik:
+#     external: true

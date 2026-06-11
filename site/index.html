@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>DÍNAMO SOMBRIO</title>
+<style>
+  :root{
+    --preto:#070605;
+    --carvao:#14110d;
+    --tungstenio:#ffb347;
+    --cobre:#b87333;
+    --ferrugem:#6e3b1f;
+    --sangue:#8b0000;
+    --calor:#ff5a2a;
+    --texto:#d8c9a3;
+    --sepia:#c4a86a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--preto);
+    font-family:'Courier New', Courier, monospace;color:var(--texto);
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #game{position:fixed;inset:0;display:block;}
+  .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:24px;z-index:10;
+    background:radial-gradient(ellipse at 50% 40%, rgba(40,30,18,.55), rgba(7,6,5,.97) 70%);}
+  .hidden{display:none!important;}
+  h1{font-size:clamp(28px,7vw,58px);letter-spacing:.35em;color:var(--tungstenio);
+    text-shadow:0 0 18px rgba(255,179,71,.45), 0 0 60px rgba(255,179,71,.15);
+    margin-bottom:6px;animation:flicker 4s infinite;}
+  @keyframes flicker{
+    0%,93%,100%{opacity:1;} 94%{opacity:.35;} 95%{opacity:.9;} 97%{opacity:.4;} 98%{opacity:1;}
+  }
+  .sub{font-size:clamp(11px,2.6vw,15px);letter-spacing:.2em;color:#8a7a58;margin-bottom:18px;}
+  .recordes{font-size:clamp(10px,2.4vw,13px);letter-spacing:.18em;color:#6f5f3f;margin-bottom:16px;min-height:1em;}
+  .recordes b{color:var(--tungstenio);}
+  .placa{border:1px solid #3a2f1e;background:rgba(20,17,13,.8);padding:16px 20px;max-width:540px;
+    font-size:clamp(11px,2.7vw,14px);line-height:1.75;text-align:left;margin-bottom:20px;
+    box-shadow:inset 0 0 30px rgba(0,0,0,.7);}
+  .placa b{color:var(--tungstenio);}
+  .placa .perigo{color:#c0392b;}
+  .placa .quente{color:var(--calor);}
+
+  /* ---- bilhete narrativo ---- */
+  .bilhete{
+    max-width:480px;width:100%;
+    background:linear-gradient(135deg, #1a1208 0%, #130f07 60%, #1a1208 100%);
+    border:1px solid #4a3515;
+    border-top:3px solid #5a4020;
+    padding:18px 22px;
+    margin-bottom:22px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style:italic;
+    font-size:clamp(11px,2.5vw,13.5px);
+    line-height:1.85;
+    color:var(--sepia);
+    text-align:left;
+    position:relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,.7), inset 0 0 40px rgba(0,0,0,.5);
+    transform: rotate(-0.4deg);
+  }
+  .bilhete::before{
+    content:'';position:absolute;top:-1px;left:18px;right:18px;height:2px;
+    background:linear-gradient(90deg, transparent, rgba(255,179,71,.25), transparent);
+  }
+  .bilhete .bil-data{
+    display:block;font-size:clamp(9px,2vw,11px);letter-spacing:.2em;
+    color:#7a6040;margin-bottom:10px;font-style:normal;font-family:'Courier New',monospace;
+  }
+  .bilhete .bil-assinatura{
+    display:block;margin-top:12px;text-align:right;
+    font-size:clamp(10px,2.2vw,12px);color:#6a5030;
+  }
+
+  /* ---- achievements ---- */
+  .ach-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+    max-width:560px;margin-bottom:20px;}
+  .ach-item{
+    font-size:clamp(9px,1.9vw,11px);letter-spacing:.12em;
+    border:1px solid #2a2010;background:rgba(15,12,8,.85);
+    padding:7px 11px;
+    color:#4a3a20;transition:all .3s;
+    display:flex;align-items:center;gap:6px;
+  }
+  .ach-item.desbloqueado{
+    border-color:#5a4020;color:var(--tungstenio);
+    background:rgba(30,22,10,.9);
+    box-shadow:0 0 10px rgba(255,179,71,.15);
+  }
+  .ach-item .ach-ico{font-size:1.1em;}
+
+  /* ---- toast de achievement ---- */
+  #toast-container{
+    position:fixed;bottom:24px;right:20px;z-index:50;
+    display:flex;flex-direction:column-reverse;gap:10px;
+    pointer-events:none;
+  }
+  .toast{
+    background:rgba(10,8,5,.95);
+    border:1px solid var(--cobre);
+    border-left:3px solid var(--tungstenio);
+    padding:10px 16px;
+    font-size:clamp(10px,2.2vw,12px);
+    letter-spacing:.18em;
+    color:var(--texto);
+    min-width:220px;max-width:300px;
+    box-shadow:0 4px 20px rgba(0,0,0,.7), 0 0 18px rgba(255,179,71,.12);
+    animation:toastIn .35s ease forwards;
+    display:flex;align-items:center;gap:10px;
+  }
+  .toast.saindo{animation:toastOut .4s ease forwards;}
+  .toast-star{color:var(--tungstenio);font-size:1.3em;}
+  .toast-nome{font-weight:bold;display:block;color:var(--tungstenio);margin-bottom:2px;}
+  .toast-desc{display:block;color:#7a6a50;font-size:.9em;letter-spacing:.1em;}
+  @keyframes toastIn{
+    from{opacity:0;transform:translateX(40px);}
+    to{opacity:1;transform:translateX(0);}
+  }
+  @keyframes toastOut{
+    from{opacity:1;transform:translateX(0);}
+    to{opacity:0;transform:translateX(40px);}
+  }
+
+  button{font-family:inherit;font-size:clamp(14px,3.2vw,18px);letter-spacing:.25em;
+    background:transparent;color:var(--tungstenio);border:1px solid var(--cobre);
+    padding:14px 38px;cursor:pointer;transition:all .2s;}
+  button:hover,button:focus-visible{background:rgba(255,179,71,.12);box-shadow:0 0 24px rgba(255,179,71,.25);outline:none;}
+  #hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;
+    align-items:flex-start;padding:14px 18px;z-index:5;pointer-events:none;gap:12px;
+    font-size:clamp(10px,2.2vw,13px);letter-spacing:.15em;}
+  .gauge{width:min(34vw,200px);margin-bottom:8px;}
+  .gauge-label{margin-bottom:4px;color:#9a8862;white-space:nowrap;}
+  .gauge-track{height:9px;border:1px solid #4a3a22;background:#0c0a07;position:relative;overflow:hidden;}
+  .gauge-fill{height:100%;width:50%;background:linear-gradient(90deg,var(--ferrugem),var(--tungstenio));
+    transition:width .12s linear;box-shadow:0 0 12px rgba(255,179,71,.5);}
+  .gauge-fill.critico{background:linear-gradient(90deg,#3a0000,var(--sangue));
+    box-shadow:0 0 12px rgba(139,0,0,.7);}
+  #calor-fill{background:linear-gradient(90deg,#52220e,var(--calor));
+    box-shadow:0 0 12px rgba(255,90,42,.55);}
+  #calor-fill.critico{animation:pulsa .4s infinite alternate;}
+  @keyframes pulsa{from{filter:brightness(1);}to{filter:brightness(1.8);}}
+  #info-dir{text-align:right;color:#9a8862;}
+  #info-dir b{display:block;font-size:clamp(17px,4.2vw,24px);color:var(--texto);letter-spacing:.1em;}
+  #noite-tag{color:var(--tungstenio);margin-bottom:4px;}
+  #aviso{position:fixed;top:17%;left:0;right:0;text-align:center;z-index:6;pointer-events:none;
+    font-size:clamp(13px,3.2vw,18px);letter-spacing:.3em;color:#c0392b;
+    text-shadow:0 0 14px rgba(139,0,0,.8);opacity:0;transition:opacity .3s;}
+  #aviso.on{opacity:1;animation:flicker 1.2s infinite;}
+  #aviso.quente{color:var(--calor);text-shadow:0 0 14px rgba(255,90,42,.8);}
+  .crankzone{position:fixed;bottom:0;width:50%;height:34%;z-index:4;display:flex;
+    align-items:flex-end;justify-content:center;padding-bottom:22px;
+    font-size:clamp(10px,2.4vw,13px);letter-spacing:.2em;color:rgba(216,201,163,.35);}
+  #zonaE{left:0;border-right:1px dashed rgba(184,115,51,.12);}
+  #zonaD{right:0;}
+  .crankzone:active{background:radial-gradient(circle at 50% 80%, rgba(255,179,71,.06), transparent 60%);}
+  #btn-fusivel{position:fixed;left:50%;transform:translateX(-50%);bottom:36%;z-index:7;
+    border-color:var(--sangue);color:#e0a0a0;font-size:clamp(11px,2.6vw,14px);
+    padding:12px 22px;background:rgba(20,8,8,.85);animation:flicker 1s infinite;}
+  #fusivel-prog{position:fixed;left:50%;transform:translateX(-50%);bottom:32%;z-index:7;
+    width:min(60vw,260px);height:8px;border:1px solid var(--cobre);background:#0c0a07;}
+  #fusivel-prog div{height:100%;width:0%;background:var(--tungstenio);box-shadow:0 0 10px rgba(255,179,71,.7);}
+  #fim-titulo{font-size:clamp(26px,7vw,52px);letter-spacing:.3em;margin-bottom:10px;}
+  #fim-titulo.morte{color:var(--sangue);text-shadow:0 0 30px rgba(139,0,0,.9);}
+  #fim-titulo.vitoria{color:var(--tungstenio);text-shadow:0 0 30px rgba(255,179,71,.6);}
+  #fim-texto{max-width:500px;line-height:1.8;margin-bottom:20px;color:#9a8862;
+    font-size:clamp(12px,3vw,15px);}
+  #fim-ach{max-width:500px;margin-bottom:22px;font-size:clamp(10px,2.2vw,12px);
+    letter-spacing:.15em;color:var(--tungstenio);min-height:1em;}
+  @media (prefers-reduced-motion: reduce){
+    h1,#aviso.on,#btn-fusivel,#calor-fill.critico,.toast,.toast.saindo{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div>
+    <div class="gauge">
+      <div class="gauge-label">⚡ CARGA</div>
+      <div class="gauge-track"><div class="gauge-fill" id="carga-fill"></div></div>
+    </div>
+    <div class="gauge">
+      <div class="gauge-label">🔥 TEMPERATURA</div>
+      <div class="gauge-track"><div class="gauge-fill" id="calor-fill"></div></div>
+    </div>
+  </div>
+  <div id="info-dir">
+    <div id="noite-tag">NOITE 1 / 3</div>
+    <span>ATÉ O AMANHECER</span><b id="timer-val">3:00</b>
+  </div>
+</div>
+
+<div id="aviso"></div>
+
+<div id="zonaE" class="crankzone hidden">◀ MANIVELA</div>
+<div id="zonaD" class="crankzone hidden">MANIVELA ▶</div>
+
+<button id="btn-fusivel" class="hidden">⚠ SEGURE [E] — TROCAR FUSÍVEL</button>
+<div id="fusivel-prog" class="hidden"><div></div></div>
+
+<!-- ===== TELA INÍCIO ===== -->
+<div id="tela-inicio" class="screen">
+  <h1>DÍNAMO SOMBRIO</h1>
+  <div class="sub">USINA Nº 7 — TRÊS NOITES — 1923</div>
+  <div class="placa">
+    O velho dínamo é a única coisa entre você e <span class="perigo">aquilo que vive no escuro</span>.<br><br>
+    <b>GIRE A MANIVELA:</b> alterne <b>← →</b> (ou <b>A / D</b>). No celular, toque alternando os dois lados da tela.<br><br>
+    <span class="perigo">⚠ FUSÍVEIS:</span> de tempos em tempos um fusível queima e a manivela perde quase toda a força. <b>Segure [E]</b> (ou o botão na tela) para trocá-lo — mas trocando, você não gira.<br><br>
+    <span class="quente">🔥 SUPERAQUECIMENTO:</span> manter a carga no máximo esquenta o dínamo. Se a temperatura estourar, <b>ele trava</b> e a manivela emperra por vários segundos.<br><br>
+    Sobreviva <b>3 noites</b>, cada uma pior que a anterior.
+  </div>
+  <div class="recordes" id="inicio-rec"></div>
+  <div class="ach-grid" id="inicio-ach"></div>
+  <button id="btn-iniciar">PUXAR O DISJUNTOR</button>
+</div>
+
+<!-- ===== TELA NOITE ===== -->
+<div id="tela-noite" class="screen hidden">
+  <h1 id="noite-titulo">NOITE 1</h1>
+  <div class="sub" id="noite-sub"></div>
+  <div class="recordes" id="noite-rec"></div>
+  <div class="bilhete hidden" id="bilhete-noite">
+    <span class="bil-data" id="bil-data"></span>
+    <span id="bil-texto"></span>
+    <span class="bil-assinatura" id="bil-assinatura"></span>
+  </div>
+  <button id="btn-noite">COMEÇAR O TURNO</button>
+</div>
+
+<!-- ===== TELA FIM ===== -->
+<div id="tela-fim" class="screen hidden">
+  <div id="fim-titulo"></div>
+  <div id="fim-texto"></div>
+  <div id="fim-ach"></div>
+  <button id="btn-reiniciar">NOVO TURNO</button>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toast-container"></div>
+
+<script>
+(() => {
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+let W, H, DPR;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener('resize', resize); resize();
+
+// ---------- níveis ----------
+const NOITES = [
+  { dur:180, decai0:6,  decai1:12, fuseMin:38, fuseMax:55, criatura:13, calorTaxa:16, travaDur:3.0,
+    sub:'O turno começa calmo. Mantenha o ritmo e não deixe a carga cair.' },
+  { dur:210, decai0:7,  decai1:15, fuseMin:26, fuseMax:40, criatura:16, calorTaxa:21, travaDur:4.5,
+    sub:'Os fusíveis estão velhos. E algo aprendeu o caminho até a sala do dínamo.' },
+  { dur:240, decai0:8,  decai1:18, fuseMin:18, fuseMax:30, criatura:19, calorTaxa:24, travaDur:5.5,
+    sub:'A última noite. O dínamo está no limite — e ele também.' }
+];
+
+// ---------- bilhetes narrativos ----------
+const BILHETES = [
+  {
+    data:'14 de março, 1923 — Turno noturno',
+    texto:'Tudo funcionando dentro do esperado. Dínamo respondendo bem, temperatura estável. ' +
+      'Só uma coisa estranha: por volta das 2h, ouvi um som vindo do setor leste — como passos pesados ' +
+      'arrastando no piso de pedra. Fui verificar e não havia ninguém. Provavelmente ratos nos ' +
+      'dutos de ventilação. Vou mencionar ao engenheiro-chefe pela manhã.\n\n' +
+      'Ah — não deixe a luz apagar por muito tempo. O supervisor reclama.',
+    assinatura:'— Operador R. Menezes'
+  },
+  {
+    data:'15 de março, 1923 — Turno noturno',
+    texto:'Não eram ratos.\n\nNa primeira vez que os fusíveis queimaram e as luzes baixaram, eu vi. ' +
+      'No canto da sala, junto à parede do fundo. Dois pontos brancos, na altura de um homem. ' +
+      'Quando a carga voltou, não havia nada lá.\n\n' +
+      'Não entro em pânico. Mas escrevo isto porque quero que o próximo operador saiba: ' +
+      'não deixe as luzes apagar. Seja o que for que vive nessa escuridão, ' +
+      'ele não gosta da luz. E a luz não gosta de fusíveis queimados.\n\n' +
+      'Pelo amor de Deus, mantenha a carga.',
+    assinatura:'— Operador R. Menezes'
+  },
+  {
+    data:'16 de março, 1923',
+    texto:'Quem ler isto: não sei se vou conseguir segurar até o amanhecer. ' +
+      'Ele está mais perto esta noite. Não espera mais no canto — anda pelo corredor, ' +
+      'eu ouço. O dínamo aqueceu demais cedo demais e quando as luzes travaram por aqueles ' +
+      'malditos segundos, ele estava na porta.\n\n' +
+      'O segredo é o ritmo. Não pare a manivela. Não deixe o calor subir. Não',
+    assinatura:'— [ilegível]'
+  }
+];
+
+// ---------- achievements ----------
+const ACHS = [
+  { id:'sobrevivente', nome:'SOBREVIVENTE',   desc:'Completar as 3 noites',                ico:'🕯️' },
+  { id:'veterano',     nome:'VETERANO',        desc:'Completar as 3 noites 3 vezes',        ico:'⚙️' },
+  { id:'frio',         nome:'SANGUE FRIO',     desc:'Noite sem temperatura acima de 60%',   ico:'❄️' },
+  { id:'no_fio',       nome:'NO FIO',          desc:'Sobreviver 10s com carga abaixo de 10%',ico:'⚡' },
+  { id:'veloz',        nome:'MÃO RÁPIDA',      desc:'30s contínuos de ritmo acelerado',     ico:'🔩' },
+  { id:'sem_fusivel',  nome:'IMPROVISO',       desc:'Completar noite sem trocar o fusível', ico:'🔌' },
+  { id:'escuridao',    nome:'FACE DAS TREVAS', desc:'Deixar proximidade chegar a 90% e sobreviver',ico:'👁️' },
+  { id:'noite3',       nome:'ÚLTIMA LUZ',      desc:'Sobreviver à noite 3',                 ico:'🌅' }
+];
+
+// ---------- estado ----------
+const S = {
+  rodando:false, noite:0, t:0, carga:70, calor:0, prox:0, rpm:0, ang:0,
+  ultimaManivela:null, ultimoGiro:0,
+  fusivelOK:true, proxFusivel:0, trocando:false, trocaProg:0, fusivelTrocadoNaNoite:false,
+  travado:0, sobrecarga:0, proxSobrecarga:0,
+  morto:false, tremor:0, faiscas:[], vapor:[], olhos:[], proxPasso:1.5, ladoCriatura:1,
+  // achievement trackers
+  tMaxCalorNoite:0, tFioAbaixo10:0, tRitmoRapido:0, proximidadeMax:0
+};
+function cfg(){ return NOITES[S.noite]; }
+
+// ---------- localStorage (recordes + achievements) ----------
+const RKEY = 'dinamo-recordes-v2';
+function lerRec(){
+  try{
+    const r = JSON.parse(localStorage.getItem(RKEY));
+    if(r && Array.isArray(r.tempos)) return r;
+  }catch(e){}
+  return { tempos:[0,0,0], vitorias:0, achs:[] };
+}
+function salvarRec(r){ try{ localStorage.setItem(RKEY, JSON.stringify(r)); }catch(e){} }
+function registrarTempo(noite, t){
+  const r = lerRec(); let novo = false;
+  if(t > (r.tempos[noite]||0)){ r.tempos[noite] = t; novo = true; }
+  salvarRec(r); return novo;
+}
+function fmtTempo(t){ return Math.floor(t/60) + ':' + String(Math.floor(t%60)).padStart(2,'0'); }
+
+function desbloquearAch(id){
+  const r = lerRec();
+  if(!r.achs) r.achs = [];
+  if(r.achs.includes(id)) return false;
+  r.achs.push(id);
+  salvarRec(r);
+  return true;
+}
+function tentarAch(id){
+  if(desbloquearAch(id)){
+    const def = ACHS.find(a=>a.id===id);
+    if(def) mostrarToast(def);
+    renderAchInicio();
+    return true;
+  }
+  return false;
+}
+
+// ---------- toast ----------
+function mostrarToast(def){
+  const ct = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span class="toast-star">${def.ico}</span><div><span class="toast-nome">★ ${def.nome}</span><span class="toast-desc">${def.desc}</span></div>`;
+  ct.appendChild(el);
+  setTimeout(()=>{
+    el.classList.add('saindo');
+    setTimeout(()=>el.remove(), 450);
+  }, 4000);
+}
+
+// ---------- render achievements ----------
+function renderAchInicio(){
+  const r = lerRec();
+  const achs = r.achs || [];
+  const grid = document.getElementById('inicio-ach');
+  grid.innerHTML = ACHS.map(a=>{
+    const ok = achs.includes(a.id);
+    return `<div class="ach-item${ok?' desbloqueado':''}">
+      <span class="ach-ico">${ok ? a.ico : '🔒'}</span>
+      <span>${a.nome}</span>
+    </div>`;
+  }).join('');
+}
+
+function mostrarRecInicio(){
+  const r = lerRec();
+  const el = document.getElementById('inicio-rec');
+  if(r.tempos.some(t=>t>0) || r.vitorias>0){
+    el.innerHTML = 'MELHORES TEMPOS — N1 <b>'+fmtTempo(r.tempos[0])+'</b> · N2 <b>'+fmtTempo(r.tempos[1])+'</b> · N3 <b>'+fmtTempo(r.tempos[2])+'</b>'
+      + (r.vitorias>0 ? ' · TURNOS COMPLETOS: <b>'+r.vitorias+'</b>' : '');
+  } else el.innerHTML = '';
+  renderAchInicio();
+}
+
+function reiniciarNoite(){
+  S.rodando=true; S.t=0; S.carga=70; S.calor=0; S.prox=0; S.rpm=0; S.ang=0;
+  S.ultimaManivela=null; S.ultimoGiro=0;
+  S.fusivelOK=true; S.proxFusivel = cfg().fuseMin + Math.random()*(cfg().fuseMax-cfg().fuseMin);
+  S.trocando=false; S.trocaProg=0; S.travado=0; S.fusivelTrocadoNaNoite=false;
+  S.sobrecarga=0; S.proxSobrecarga = 20+Math.random()*15;
+  S.morto=false; S.tremor=0; S.faiscas=[]; S.vapor=[]; S.olhos=[];
+  S.proxPasso=1.5; S.ladoCriatura = Math.random()<.5 ? -1 : 1;
+  // reset achievement trackers
+  S.tMaxCalorNoite=0; S.tFioAbaixo10=0; S.tRitmoRapido=0; S.proximidadeMax=0;
+}
+
+// ---------- áudio ----------
+let AC=null, humOsc=null, humGain=null, humFilt=null, droneOsc=null, droneGain=null;
+let respFilt=null, respGain=null, respLFO=null, respLFOGain=null, respPan=null;
+function initAudio(){
+  if(AC) return;
+  try{
+    AC = new (window.AudioContext||window.webkitAudioContext)();
+    humOsc = AC.createOscillator(); humOsc.type='sawtooth';
+    humFilt = AC.createBiquadFilter(); humFilt.type='lowpass'; humFilt.frequency.value=300;
+    humGain = AC.createGain(); humGain.gain.value=0;
+    humOsc.connect(humFilt); humFilt.connect(humGain); humGain.connect(AC.destination);
+    humOsc.start();
+    droneOsc = AC.createOscillator(); droneOsc.type='sine'; droneOsc.frequency.value=34;
+    droneGain = AC.createGain(); droneGain.gain.value=0;
+    droneOsc.connect(droneGain); droneGain.connect(AC.destination);
+    droneOsc.start();
+    const buf = AC.createBuffer(1, AC.sampleRate*2, AC.sampleRate);
+    const dd = buf.getChannelData(0);
+    for(let i=0;i<dd.length;i++) dd[i] = Math.random()*2-1;
+    const respSrc = AC.createBufferSource(); respSrc.buffer = buf; respSrc.loop = true;
+    respFilt = AC.createBiquadFilter(); respFilt.type='bandpass';
+    respFilt.frequency.value = 380; respFilt.Q.value = .7;
+    respGain = AC.createGain(); respGain.gain.value = 0;
+    respLFO = AC.createOscillator(); respLFO.type='sine'; respLFO.frequency.value = .35;
+    respLFOGain = AC.createGain(); respLFOGain.gain.value = 0;
+    respLFO.connect(respLFOGain); respLFOGain.connect(respGain.gain);
+    respPan = AC.createStereoPanner ? AC.createStereoPanner() : null;
+    respSrc.connect(respFilt); respFilt.connect(respGain);
+    if(respPan){ respGain.connect(respPan); respPan.connect(AC.destination); }
+    else respGain.connect(AC.destination);
+    respSrc.start(); respLFO.start();
+  }catch(e){ AC=null; }
+}
+function blip(freq, dur, vol, tipo){
+  if(!AC) return;
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type=tipo||'square'; o.frequency.value=freq;
+  g.gain.setValueAtTime(vol, AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime+dur);
+  o.connect(g); g.connect(AC.destination);
+  o.start(); o.stop(AC.currentTime+dur+.02);
+}
+function clickManivela(){ blip(120+Math.random()*80, .07, .06, 'square'); }
+function somFusivel(){ blip(900, .25, .15, 'sawtooth'); blip(60, .5, .2, 'square'); }
+function somTrava(){
+  if(!AC) return;
+  blip(200, .8, .25, 'sawtooth');
+  blip(45, 1.4, .3, 'square');
+}
+function somSusto(){
+  if(!AC) return;
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type='sawtooth'; o.frequency.setValueAtTime(700,AC.currentTime);
+  o.frequency.exponentialRampToValueAtTime(60,AC.currentTime+.9);
+  g.gain.setValueAtTime(.4,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+1);
+  o.connect(g); g.connect(AC.destination);
+  o.start(); o.stop(AC.currentTime+1);
+}
+function somAch(){
+  if(!AC) return;
+  blip(880,.08,.08,'triangle');
+  setTimeout(()=>blip(1100,.12,.07,'triangle'),90);
+  setTimeout(()=>blip(1320,.2,.06,'triangle'),190);
+}
+function somPasso(pan){
+  if(!AC) return;
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type='sine';
+  o.frequency.setValueAtTime(80+Math.random()*30, AC.currentTime);
+  o.frequency.exponentialRampToValueAtTime(34, AC.currentTime+.16);
+  g.gain.setValueAtTime(.06 + (S.prox/100)*.22, AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime+.28);
+  o.connect(g);
+  if(AC.createStereoPanner){
+    const p = AC.createStereoPanner();
+    p.pan.value = Math.max(-1, Math.min(1, pan));
+    g.connect(p); p.connect(AC.destination);
+  } else g.connect(AC.destination);
+  o.start(); o.stop(AC.currentTime+.32);
+}
+function atualizaAudio(){
+  if(!AC) return;
+  const alvoHum = S.rodando && !S.morto ? .015 + (S.carga/100)*.05 : 0;
+  humGain.gain.setTargetAtTime(alvoHum, AC.currentTime, .1);
+  humOsc.frequency.setTargetAtTime(38 + S.carga*1.4 + S.rpm*2, AC.currentTime, .1);
+  const alvoDrone = S.rodando ? (S.prox/100)*.12 : 0;
+  droneGain.gain.setTargetAtTime(alvoDrone, AC.currentTime, .15);
+  if(respGain){
+    const r = (S.rodando && !S.morto && S.prox > 25) ? (S.prox-25)/75 : 0;
+    respGain.gain.setTargetAtTime(r*.035, AC.currentTime, .25);
+    respLFOGain.gain.setTargetAtTime(r*.03, AC.currentTime, .25);
+    respLFO.frequency.setTargetAtTime(.3 + r*.5, AC.currentTime, .3);
+    if(respPan) respPan.pan.setTargetAtTime(S.ladoCriatura*.7*(S.prox/100), AC.currentTime, .3);
+  }
+}
+
+// ---------- entrada: manivela ----------
+function girar(lado){
+  if(!S.rodando || S.morto) return;
+  if(S.trocando) return;
+  if(S.ultimaManivela === lado) return;
+  S.ultimaManivela = lado;
+  if(S.travado > 0){ blip(70,.1,.08,'square'); S.tremor=Math.max(S.tremor,.2); return; }
+  const agora = performance.now();
+  const dtg = agora - S.ultimoGiro; S.ultimoGiro = agora;
+  const bonus = dtg < 220 ? 1.25 : 1;
+  // acumular tempo de ritmo rápido para achievement
+  if(dtg < 220) S.tRitmoRapido += (dtg/1000); else S.tRitmoRapido = 0;
+  if(S.tRitmoRapido >= 30) tentarAch('veloz');
+  let forca = 2.6 * bonus;
+  if(!S.fusivelOK) forca *= .18;
+  if(S.sobrecarga > 0) forca *= .5;
+  S.carga = Math.min(100, S.carga + forca);
+  S.rpm = Math.min(20, S.rpm + 3);
+  clickManivela();
+  if(Math.random()<.4) S.faiscas.push({x:W/2+(Math.random()-.5)*40, y:H*.72, vx:(Math.random()-.5)*3, vy:-2-Math.random()*2, vida:1});
+}
+window.addEventListener('keydown', e=>{
+  const k = e.key.toLowerCase();
+  if(k==='e'){ setTroca(true); return; }
+  if(e.repeat) return;
+  if(k==='arrowleft'||k==='a') girar('E');
+  if(k==='arrowright'||k==='d') girar('D');
+});
+window.addEventListener('keyup', e=>{
+  if(e.key.toLowerCase()==='e') setTroca(false);
+});
+document.getElementById('zonaE').addEventListener('pointerdown', e=>{e.preventDefault(); girar('E');});
+document.getElementById('zonaD').addEventListener('pointerdown', e=>{e.preventDefault(); girar('D');});
+
+// ---------- entrada: fusível ----------
+function setTroca(on){
+  if(!S.rodando || S.morto || S.fusivelOK){ S.trocando=false; return; }
+  S.trocando = on;
+  if(on) S.fusivelTrocadoNaNoite = true; // marcou que tentou trocar
+  if(!on) S.trocaProg = Math.max(0, S.trocaProg - .4);
+}
+const btnFus = document.getElementById('btn-fusivel');
+btnFus.addEventListener('pointerdown', e=>{e.preventDefault(); setTroca(true);});
+window.addEventListener('pointerup', ()=> setTroca(false));
+window.addEventListener('pointercancel', ()=> setTroca(false));
+
+// ---------- olhos no escuro ----------
+function gerarOlhos(){
+  S.olhos = [];
+  const n = 2 + Math.floor(Math.random()*3) + S.noite;
+  for(let i=0;i<n;i++){
+    S.olhos.push({
+      x: Math.random()<.5 ? W*(.05+Math.random()*.18) : W*(.77+Math.random()*.18),
+      y: H*(.25+Math.random()*.45),
+      pisca: Math.random()*6
+    });
+  }
+  const mx = S.olhos.reduce((a,o)=>a+o.x,0) / S.olhos.length;
+  S.ladoCriatura = mx < W/2 ? -1 : 1;
+}
+
+// ---------- loop ----------
+let ultimo = performance.now();
+function loop(agora){
+  requestAnimationFrame(loop);
+  const dt = Math.min(.05, (agora-ultimo)/1000); ultimo = agora;
+  if(S.rodando && !S.morto) atualizar(dt);
+  desenhar();
+  atualizaAudio();
+}
+function atualizar(dt){
+  const C = cfg();
+  S.t += dt;
+
+  // decaimento
+  const prog = S.t / C.dur;
+  let decai = C.decai0 + (C.decai1 - C.decai0)*prog;
+  if(S.sobrecarga>0) decai += 6;
+  if(S.travado>0) decai += 4;
+  S.carga = Math.max(0, S.carga - decai*dt);
+  S.rpm = Math.max(0, S.rpm - 8*dt);
+  if(S.travado<=0) S.ang += S.rpm * dt;
+
+  // ---- superaquecimento (v1.2: zona perigosa em 78%, resfriamento 20/s) ----
+  if(S.travado > 0){
+    S.travado -= dt;
+    S.vapor.push({x:W/2+(Math.random()-.5)*60, y:H*.62, vy:-.6-Math.random(), vida:1, r:4+Math.random()*6});
+    if(S.travado<=0){ S.calor = 45; }
+  } else {
+    if(S.carga > 78){
+      S.calor = Math.min(100, S.calor + ((S.carga-78)/22) * C.calorTaxa * dt);
+    } else {
+      S.calor = Math.max(0, S.calor - 20*dt);
+    }
+    if(S.calor >= 100){
+      S.travado = C.travaDur;
+      S.rpm = 0; S.tremor = 1;
+      somTrava();
+    }
+  }
+  // tracker achievement temperatura
+  S.tMaxCalorNoite = Math.max(S.tMaxCalorNoite, S.calor);
+
+  // ---- fusível ----
+  if(S.fusivelOK){
+    if(S.t > S.proxFusivel){
+      S.fusivelOK = false; S.trocaProg = 0; S.tremor = .5;
+      somFusivel();
+    }
+  } else if(S.trocando){
+    S.trocaProg += dt / 2.4;
+    if(S.trocaProg >= 1){
+      S.fusivelOK = true; S.trocando = false; S.trocaProg = 0;
+      S.proxFusivel = S.t + C.fuseMin + Math.random()*(C.fuseMax-C.fuseMin);
+      blip(500,.15,.12,'triangle');
+    }
+  }
+
+  // sobrecargas
+  if(S.sobrecarga>0){ S.sobrecarga -= dt; }
+  else if(S.fusivelOK && S.t > S.proxSobrecarga){
+    S.sobrecarga = 3 + Math.random()*2;
+    S.proxSobrecarga = S.t + 30 + Math.random()*25;
+    S.tremor = Math.max(S.tremor,.5);
+  }
+
+  // ---- a criatura ----
+  if(S.carga < 35){
+    S.prox = Math.min(100, S.prox + ((35-S.carga)/35) * C.criatura * dt);
+    if(S.olhos.length===0) gerarOlhos();
+  } else {
+    S.prox = Math.max(0, S.prox - (S.carga/100) * 16 * dt);
+    if(S.prox < 8) S.olhos = [];
+  }
+  S.olhos.forEach(o=>{ o.pisca -= dt; if(o.pisca<0) o.pisca = 2+Math.random()*5; });
+  S.proximidadeMax = Math.max(S.proximidadeMax, S.prox);
+  // achievement face das trevas
+  if(S.proximidadeMax >= 90) tentarAch('escuridao');
+
+  // passos
+  if(S.prox > 18){
+    S.proxPasso -= dt;
+    if(S.proxPasso <= 0){
+      somPasso(S.ladoCriatura * (.4 + Math.random()*.5));
+      S.proxPasso = Math.max(.45, 2.1 - (S.prox/100)*1.6) + Math.random()*.3;
+    }
+  } else {
+    S.proxPasso = Math.min(S.proxPasso, 1.2);
+  }
+
+  // achievement no fio (carga < 10%)
+  if(S.carga < 10 && S.prox < 100){
+    S.tFioAbaixo10 += dt;
+    if(S.tFioAbaixo10 >= 10) tentarAch('no_fio');
+  } else {
+    S.tFioAbaixo10 = 0;
+  }
+
+  // partículas
+  S.faiscas = S.faiscas.filter(f=>f.vida>0);
+  S.faiscas.forEach(f=>{ f.x+=f.vx; f.y+=f.vy; f.vy+=.15; f.vida-=dt*2; });
+  S.vapor = S.vapor.filter(v=>v.vida>0);
+  S.vapor.forEach(v=>{ v.y+=v.vy; v.r+=dt*8; v.vida-=dt*.9; });
+
+  S.tremor = Math.max(0, S.tremor - dt);
+
+  // fim
+  if(S.prox >= 100){ morrer(); }
+  else if(S.t >= C.dur){ fimDaNoite(); }
+
+  // ---- HUD ----
+  const cf = document.getElementById('carga-fill');
+  cf.style.width = S.carga + '%';
+  cf.classList.toggle('critico', S.carga < 35);
+  const hf = document.getElementById('calor-fill');
+  hf.style.width = S.calor + '%';
+  hf.classList.toggle('critico', S.calor > 75 || S.travado>0);
+  const rest = Math.max(0, C.dur - S.t);
+  document.getElementById('timer-val').textContent =
+    Math.floor(rest/60) + ':' + String(Math.floor(rest%60)).padStart(2,'0');
+
+  const av = document.getElementById('aviso');
+  if(S.travado > 0){
+    av.textContent = 'DÍNAMO TRAVADO — AGUARDE'; av.className='quente on';
+  } else if(!S.fusivelOK){
+    av.textContent = 'FUSÍVEL QUEIMADO'; av.className='on';
+  } else if(S.prox > 45){
+    av.textContent = 'ELE ESTÁ SE APROXIMANDO'; av.className='on';
+  } else { av.className=''; }
+
+  btnFus.classList.toggle('hidden', S.fusivelOK);
+  const fp = document.getElementById('fusivel-prog');
+  fp.classList.toggle('hidden', S.fusivelOK);
+  fp.firstElementChild.style.width = (S.trocaProg*100)+'%';
+}
+
+// ---------- verificar achievements ao fim da noite ----------
+function verificarAchsFimNoite(noite){
+  const ganhos = [];
+  // sem_fusivel: completou noite e nunca tentou trocar (fusível pode ter nunca queimado ou simplesmente não trocou)
+  if(!S.fusivelTrocadoNaNoite) ganhos.push('sem_fusivel');
+  // sangue frio: temperatura nunca passou de 60%
+  if(S.tMaxCalorNoite < 60) ganhos.push('frio');
+  // noite 3
+  if(noite === 2) ganhos.push('noite3');
+  ganhos.forEach(id=>tentarAch(id));
+}
+
+function morrer(){
+  S.morto = true; somSusto();
+  const novoRec = registrarTempo(S.noite, S.t);
+  const recAtual = lerRec().tempos[S.noite];
+  btnFus.classList.add('hidden');
+  document.getElementById('fusivel-prog').classList.add('hidden');
+  setTimeout(()=>{
+    mostrarFim('VOCÊ FOI LEVADO', 'morte',
+      'As luzes apagaram por tempo demais. Na escuridão, algo finalmente alcançou a sala do dínamo. ' +
+      'Caiu na noite ' + (S.noite+1) + ', após ' + Math.floor(S.t) + ' segundos. ' +
+      (novoRec ? '★ NOVO RECORDE DA NOITE: ' + fmtTempo(S.t) + '.'
+               : 'Recorde da noite: ' + fmtTempo(recAtual) + '.'),
+      'RECOMEÇAR A NOITE ' + (S.noite+1));
+  }, 1100);
+}
+function fimDaNoite(){
+  S.rodando = false;
+  verificarAchsFimNoite(S.noite);
+  esconderJogo();
+  registrarTempo(S.noite, cfg().dur);
+  if(S.noite >= NOITES.length-1){
+    const r = lerRec(); r.vitorias++; salvarRec(r);
+    tentarAch('sobrevivente');
+    if(r.vitorias >= 3) tentarAch('veterano');
+    mostrarFim('VOCÊ SOBREVIVEU ÀS TRÊS NOITES', 'vitoria',
+      'A primeira luz do terceiro amanhecer atravessa as janelas da usina. O dínamo, exausto, desacelera. ' +
+      'O que quer que vivesse no escuro recuou para onde veio. A Usina Nº 7 é sua.',
+      'JOGAR DE NOVO');
+    S.noite = -1;
+  } else {
+    S.noite++;
+    telaNoite();
+  }
+}
+function telaNoite(){
+  document.getElementById('noite-titulo').textContent = 'NOITE ' + (S.noite+1);
+  document.getElementById('noite-sub').textContent = cfg().sub;
+  const rec = lerRec().tempos[S.noite] || 0;
+  document.getElementById('noite-rec').innerHTML =
+    rec >= cfg().dur ? 'NOITE JÁ COMPLETADA — <b>' + fmtTempo(rec) + '</b>'
+    : rec > 0 ? 'MELHOR TEMPO NESTA NOITE: <b>' + fmtTempo(rec) + '</b>' : '';
+
+  // bilhete narrativo
+  const bil = BILHETES[S.noite];
+  const bilEl = document.getElementById('bilhete-noite');
+  if(bil){
+    document.getElementById('bil-data').textContent = bil.data;
+    // preservar quebras de linha no texto
+    document.getElementById('bil-texto').innerHTML = bil.texto.replace(/\n/g,'<br>');
+    document.getElementById('bil-assinatura').textContent = bil.assinatura;
+    bilEl.classList.remove('hidden');
+  } else {
+    bilEl.classList.add('hidden');
+  }
+
+  document.getElementById('tela-noite').classList.remove('hidden');
+}
+function mostrarFim(titulo, classe, texto, btn){
+  S.rodando = false;
+  esconderJogo();
+  const t = document.getElementById('fim-titulo');
+  t.textContent = titulo; t.className = classe;
+  document.getElementById('fim-texto').textContent = texto;
+  document.getElementById('btn-reiniciar').textContent = btn || 'NOVO TURNO';
+  // achievements desbloqueados na sessão
+  const r = lerRec();
+  const achDesbloq = (r.achs||[]);
+  document.getElementById('fim-ach').innerHTML =
+    achDesbloq.length > 0
+      ? '★ ' + achDesbloq.length + ' / ' + ACHS.length + ' CONQUISTAS DESBLOQUEADAS'
+      : '';
+  document.getElementById('tela-fim').classList.remove('hidden');
+}
+function esconderJogo(){
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('zonaE').classList.add('hidden');
+  document.getElementById('zonaD').classList.add('hidden');
+  document.getElementById('aviso').className='';
+  btnFus.classList.add('hidden');
+  document.getElementById('fusivel-prog').classList.add('hidden');
+}
+
+// ---------- desenho ----------
+function desenhar(){
+  ctx.fillStyle = '#070605';
+  ctx.fillRect(0,0,W,H);
+  if(!S.rodando && !S.morto) return;
+
+  const tx = S.tremor>0 ? (Math.random()-.5)*8*S.tremor : 0;
+  const ty = S.tremor>0 ? (Math.random()-.5)*8*S.tremor : 0;
+  ctx.save(); ctx.translate(tx,ty);
+
+  let luz = S.morto ? 0 : S.carga/100;
+  if(!S.fusivelOK) luz *= (Math.random()<.12 ? .8 : .35);
+  const flicker = luz * (0.9 + Math.sin(performance.now()/40)*.04 + (Math.random()-.5)*.05);
+  const cx = W/2, lampY = H*.16;
+
+  if(flicker > .02){
+    const raio = Math.max(80, flicker * Math.max(W,H) * .75);
+    const g = ctx.createRadialGradient(cx, lampY, 10, cx, lampY, raio);
+    g.addColorStop(0, `rgba(255,196,110,${.5*flicker})`);
+    g.addColorStop(.4, `rgba(160,110,50,${.22*flicker})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // lâmpada
+  ctx.strokeStyle = '#2a2218'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, lampY-14); ctx.stroke();
+  ctx.fillStyle = flicker>.05 ? `rgba(255,210,130,${.4+.6*flicker})` : '#1c160e';
+  ctx.beginPath(); ctx.arc(cx, lampY, 9, 0, 7); ctx.fill();
+  if(flicker>.05){
+    ctx.fillStyle = `rgba(255,230,170,${flicker*.9})`;
+    ctx.beginPath(); ctx.arc(cx, lampY, 4, 0, 7); ctx.fill();
+  }
+
+  // ---- dínamo ----
+  const dy = H*.7, R = Math.min(W,H)*.13;
+  const quente = S.calor/100;
+  ctx.fillStyle = '#100d09';
+  ctx.fillRect(cx-R*1.6, dy+R*.8, R*3.2, R*.5);
+
+  if(quente > .4){
+    const hg = ctx.createRadialGradient(cx, dy, R*.2, cx, dy, R*1.8);
+    hg.addColorStop(0, `rgba(255,90,42,${(quente-.4)*.45})`);
+    hg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = hg;
+    ctx.fillRect(cx-R*2, dy-R*2, R*4, R*4);
+  }
+
+  ctx.lineWidth = R*.18;
+  const rq = Math.min(255, 40+90*flicker + quente*120);
+  ctx.strokeStyle = `rgb(${rq},${28+60*flicker},${16+30*flicker})`;
+  ctx.beginPath(); ctx.arc(cx, dy, R, 0, 7); ctx.stroke();
+  for(let i=0;i<8;i++){
+    const a = i*Math.PI/4;
+    ctx.fillStyle = `rgb(${Math.min(255,60+124*flicker+quente*90)},${38+77*flicker},${20+31*flicker})`;
+    ctx.beginPath();
+    ctx.arc(cx+Math.cos(a)*R, dy+Math.sin(a)*R, R*.13, 0, 7);
+    ctx.fill();
+  }
+  ctx.save();
+  ctx.translate(cx, dy); ctx.rotate(S.ang);
+  ctx.strokeStyle = `rgb(${50+110*flicker},${35+70*flicker},${18+30*flicker})`;
+  ctx.lineWidth = R*.08;
+  for(let i=0;i<3;i++){
+    ctx.rotate(Math.PI/3);
+    ctx.beginPath(); ctx.moveTo(-R*.72,0); ctx.lineTo(R*.72,0); ctx.stroke();
+  }
+  ctx.fillStyle = `rgb(${70+130*flicker},${48+80*flicker},${24+36*flicker})`;
+  ctx.beginPath(); ctx.arc(0,0,R*.2,0,7); ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.translate(cx+R*1.35, dy); ctx.rotate(S.ang*1.5);
+  ctx.strokeStyle = '#3a2f1e'; ctx.lineWidth = R*.1;
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(R*.55,0); ctx.stroke();
+  ctx.fillStyle = '#594732';
+  ctx.beginPath(); ctx.arc(R*.55,0,R*.12,0,7); ctx.fill();
+  ctx.restore();
+
+  // caixa de fusíveis
+  const fx = W*.12, fy = H*.45;
+  ctx.fillStyle = '#0e0b08';
+  ctx.fillRect(fx-22, fy-30, 44, 60);
+  ctx.strokeStyle = S.fusivelOK ? '#3a2f1e' : '#6e1410';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(fx-22, fy-30, 44, 60);
+  ctx.fillStyle = S.fusivelOK
+    ? `rgba(255,179,71,${.3+.5*flicker})`
+    : `rgba(190,30,20,${.4+Math.random()*.5})`;
+  ctx.beginPath(); ctx.arc(fx, fy, 6, 0, 7); ctx.fill();
+
+  S.faiscas.forEach(f=>{
+    ctx.fillStyle = `rgba(255,210,120,${f.vida})`;
+    ctx.fillRect(f.x, f.y, 2.5, 2.5);
+  });
+  S.vapor.forEach(v=>{
+    ctx.fillStyle = `rgba(200,200,200,${v.vida*.18})`;
+    ctx.beginPath(); ctx.arc(v.x, v.y, v.r, 0, 7); ctx.fill();
+  });
+
+  if(S.sobrecarga>0 && Math.random()<.5){
+    ctx.strokeStyle = `rgba(180,220,255,${.3+Math.random()*.5})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    let x = cx-R, y = dy-R;
+    ctx.moveTo(x,y);
+    for(let i=0;i<5;i++){ x+= R*.4; y+= (Math.random()-.5)*R*.8; ctx.lineTo(x,y); }
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(120,150,200,.06)';
+    ctx.fillRect(0,0,W,H);
+  }
+
+  const escuro = 1 - flicker;
+  if(S.prox > 5){
+    const intens = (S.prox/100) * Math.max(.25, escuro);
+    S.olhos.forEach(o=>{
+      if(o.pisca < .18) return;
+      const ax = o.x + (cx - o.x) * (S.prox/100) * .45;
+      const ay = o.y + (dy - o.y) * (S.prox/100) * .3;
+      const r = 2.2 + (S.prox/100)*3.5;
+      ctx.fillStyle = `rgba(220,235,245,${intens})`;
+      ctx.shadowColor = 'rgba(200,225,255,.9)'; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(ax-7, ay, r, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(ax+7, ay, r, 0, 7); ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+  }
+
+  const vin = ctx.createRadialGradient(cx, H*.5, Math.max(40, (1-S.prox/130)*Math.max(W,H)*.6), cx, H*.5, Math.max(W,H)*.85);
+  vin.addColorStop(0,'rgba(0,0,0,0)');
+  vin.addColorStop(1,`rgba(0,0,0,${.75 + (S.prox/100)*.25})`);
+  ctx.fillStyle = vin; ctx.fillRect(0,0,W,H);
+
+  if(S.morto){
+    ctx.fillStyle = 'rgba(0,0,0,.92)'; ctx.fillRect(0,0,W,H);
+    const p = (performance.now()%1000)/1000;
+    ctx.fillStyle = `rgba(230,240,250,${.7+.3*Math.sin(p*7)})`;
+    ctx.shadowColor='rgba(200,225,255,1)'; ctx.shadowBlur=30;
+    ctx.beginPath(); ctx.arc(cx-26, H*.42, 11, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+26, H*.42, 11, 0, 7); ctx.fill();
+    ctx.shadowBlur=0;
+  }
+  ctx.restore();
+}
+
+// ---------- telas ----------
+document.getElementById('btn-iniciar').addEventListener('click', ()=>{
+  initAudio(); if(AC && AC.state==='suspended') AC.resume();
+  document.getElementById('tela-inicio').classList.add('hidden');
+  S.noite = 0;
+  telaNoite();
+});
+document.getElementById('btn-noite').addEventListener('click', ()=>{
+  document.getElementById('tela-noite').classList.add('hidden');
+  iniciar();
+});
+document.getElementById('btn-reiniciar').addEventListener('click', ()=>{
+  document.getElementById('tela-fim').classList.add('hidden');
+  if(S.noite < 0) S.noite = 0;
+  telaNoite();
+});
+function iniciar(){
+  reiniciarNoite();
+  document.getElementById('noite-tag').textContent = 'NOITE ' + (S.noite+1) + ' / ' + NOITES.length;
+  document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('zonaE').classList.remove('hidden');
+  document.getElementById('zonaD').classList.remove('hidden');
+}
+mostrarRecInicio();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
