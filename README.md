@@ -4,7 +4,7 @@
 
 Jogo de terror para navegador em arquivo HTML único, agora acompanhado de um backend PostgreSQL + Node.js para ranking global de jogadores. Sobreviva à manutenção do velho dínamo e fuja pelos corredores escuros até o elevador.
 
-![Versão](https://img.shields.io/badge/versão-2.6-b87333?style=flat-square)
+![Versão](https://img.shields.io/badge/versão-2.8-b87333?style=flat-square)
 ![Stack](https://img.shields.io/badge/tecnologia-Vite%20+%20Express%20+%20PG-ffb347?style=flat-square)
 ![Mobile](https://img.shields.io/badge/mobile-primeira%20classe-8b0000?style=flat-square)
 
@@ -31,7 +31,7 @@ Cuidado com a **tensão do cabo**. Se girar rápido demais, o cabo arrebenta. Se
 - **Movimentação:** Setas ou WASD. Vertical controla a velocidade, horizontal desvia de obstáculos.
 Sobreviva à hipotermia e fuja da criatura correndo na neve. Pare perto dos **barris de fogo** para recuperar o calor do corpo, mas cuidado com o que vem atrás.
 
-> **Regra Crucial:** O jogo não possui continues! Uma morte em qualquer etapa reinicia seu turno inteiro a partir da Fase 1, mas sua pontuação será enviada ao Ranking Global no ponto de morte.
+> **Regra Crucial:** Ao morrer, você **reiniciará a fase em que foi pego** (com o tempo do zero), mas a pontuação que você perdeu naquela fase não contará pro seu ranking global final. Sua pontuação será preservada pelas fases concluídas!
 
 ---
 
@@ -62,6 +62,7 @@ Acesse `http://localhost:8095` (ou sua URL de produção) no navegador. O Docker
 
 | Versão | Destaques |
 |---|---|
+| **v2.8** | Continues por Fase, Novo Design Industrial do Dínamo, Auto-Runner na Nevasca (Fase 4), Tutoriais em Tela Intersticial. |
 | **v2.6** | Modo Pesadelo (Novo Jogo+) com dificuldade 1.5x maior, conquista secreta `💀` e consumíveis escassos. |
 | **v2.5** | Fase 4 (Exterior Congelado e mecânica de Hipotermia), Raycasting no Corredor, Filtros CRT, Colecionáveis (Lore), Sync de conquistas no Banco de Dados |
 | **v2.0** | Fuga (Fase 2: Corredor e Fase 3: Elevador), Arquitetura Modular (Vite/ESM), Banco de Dados PostgreSQL, Ranking Global na tela inicial |
