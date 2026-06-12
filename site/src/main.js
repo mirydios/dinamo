@@ -60,18 +60,51 @@ function prepararFase() {
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('tela-fase').classList.remove('hidden');
 
+  const boxTut = document.getElementById('fase-tutorial');
+
   if (GLOBAL.faseID === 1) {
     document.getElementById('fase-titulo').textContent = `DÍNAMO - NOITE ${GLOBAL.noiteDinamo + 1}`;
     document.getElementById('fase-sub').textContent = FaseDinamo.NOITES_DINAMO ? FaseDinamo.NOITES_DINAMO[GLOBAL.noiteDinamo].sub : '';
+    if(boxTut) boxTut.innerHTML = `
+      <b>COMO JOGAR:</b><br><br>
+      • <b>[A]/[D]</b> ou <b>[←]/[→]</b> para girar a manivela (Mobile: toque nas laterais da tela).<br>
+      • Mantenha a energia alta para afastar a criatura.<br>
+      • <b>CUIDADO:</b> Girar muito aquece o motor (🔥). Se ferver, o dínamo trava.<br>
+      • Quando o fusível queimar, segure <b>[E]</b> (Mobile: Botão Laranja) até trocar.
+    `;
   } else if (GLOBAL.faseID === 2) {
     document.getElementById('fase-titulo').textContent = 'CORREDOR ESCURO';
     document.getElementById('fase-sub').textContent = 'A luz atrai, mas a escuridão mata. Encontre o elevador.';
+    if(boxTut) boxTut.innerHTML = `
+      <b>COMO JOGAR:</b><br><br>
+      • <b>[W][A][S][D]</b> ou <b>Setas</b> para caminhar pelo labirinto.<br>
+      • O óleo da lanterna vaza. Sem visão = morte.<br>
+      • Aperte <b>[ESPAÇO]</b> (Mobile: Centro do D-Pad) repetidamente para bombear óleo.<br>
+      • Você <b>não pode</b> andar enquanto bombeia.<br>
+      • Encontre a saída (quadrado verde) antes que ela te alcance nas sombras.
+    `;
   } else if (GLOBAL.faseID === 3) {
     document.getElementById('fase-titulo').textContent = 'POÇO DO ELEVADOR';
     document.getElementById('fase-sub').textContent = 'Suba. Não pare. Não olhe para baixo.';
+    if(boxTut) boxTut.innerHTML = `
+      <b>COMO JOGAR:</b><br><br>
+      • <b>[A]/[D]</b> ou <b>[←]/[→]</b> para subir a manivela do guincho.<br>
+      • Girar rápido demais aumenta a <b>Tensão do Cabo</b> (⚠️). Se chegar a 100%, ele arrebenta e o elevador despenca alguns metros.<br>
+      • Parar de girar faz o elevador descer sozinho pela gravidade.<br>
+      • Segure <b>[E]</b> para acionar o freio (trava a queda).<br>
+      • Fuja da silhueta que escala pelo poço!
+    `;
   } else if (GLOBAL.faseID === 4) {
     document.getElementById('fase-titulo').textContent = 'NEVASCA';
     document.getElementById('fase-sub').textContent = 'O portão da usina. Não congele.';
+    if(boxTut) boxTut.innerHTML = `
+      <b>COMO JOGAR:</b><br><br>
+      • <b>[W]/[S]</b> ou <b>[↑]/[↓]</b> para correr pela neve.<br>
+      • <b>[A]/[D]</b> ou <b>[←]/[→]</b> para desviar dos obstáculos.<br>
+      • A nevasca causa <b>Hipotermia</b>. A barra térmica cai constantemente.<br>
+      • Aproxime-se dos <b>Barris de Fogo</b> para recuperar calor corporal.<br>
+      • Corra para a saída!
+    `;
   }
 }
 
