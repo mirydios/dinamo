@@ -26,7 +26,7 @@ export const FaseExterior = {
 
     // Gerar mapa (obstáculos e barris)
     let cy = 200;
-    const chanceBarril = GLOBAL.pesadelo ? 0.08 : 0.15;
+    const chanceBarril = GLOBAL.pesadelo ? 0.12 : 0.22; // Aumentado para garantir fogueiras
     while(cy < this.S.distanciaFinal - 300) {
       if(Math.random() < chanceBarril) {
         // Barril de fogo
@@ -75,12 +75,15 @@ export const FaseExterior = {
     if (s.keys['arrowright'] || s.keys['d']) dx = 1;
     
     // Movimentação (frente/trás) dita a velocidade de progressão
-    let targetVel = 0;
-    if (s.keys['arrowup'] || s.keys['w']) targetVel = 250;
-    else if (s.keys['arrowdown'] || s.keys['s']) targetVel = -100;
+    let targetVel = 120; // Auto-runner lento por padrão
+    if (s.keys['arrowup'] || s.keys['w']) targetVel = 320; // Corre rápido
+    else if (s.keys['arrowdown'] || s.keys['s']) targetVel = 40; // Freia
     
     s.vel += (targetVel - s.vel) * 4 * dt;
     if(s.vel < 0 && s.progresso <= 0) s.vel = 0;
+
+    // Feedback visual do movimento: altera a posição Y do jogador com base na velocidade
+    s.py = H * 0.8 - ((s.vel - 120) / 200) * (H * 0.15);
 
     s.px += dx * 200 * dt;
     s.px = Math.max(10, Math.min(W-10, s.px));
