@@ -3,9 +3,9 @@ import { blip } from '../core/audio.js';
 import { triggerMorte, completarFase } from '../main.js';
 
 export const NOITES_DINAMO = [
-  { dur: 180, decai0: 6, decai1: 12, fuseMin: 38, fuseMax: 55, criatura: 13, calorTaxa: 16, travaDur: 3.0, sub: 'O turno começa calmo. Mantenha o ritmo.' },
-  { dur: 210, decai0: 7, decai1: 15, fuseMin: 26, fuseMax: 40, criatura: 16, calorTaxa: 21, travaDur: 4.5, sub: 'Os fusíveis estão velhos.' },
-  { dur: 240, decai0: 8, decai1: 18, fuseMin: 18, fuseMax: 30, criatura: 19, calorTaxa: 24, travaDur: 5.5, sub: 'A última noite. Não pare.' }
+  { dur: 60, decai0: 6, decai1: 12, fuseMin: 20, fuseMax: 40, criatura: 13, calorTaxa: 16, travaDur: 3.0, sub: 'O turno começa calmo. Mantenha o ritmo.' },
+  { dur: 90, decai0: 7, decai1: 15, fuseMin: 15, fuseMax: 30, criatura: 16, calorTaxa: 21, travaDur: 4.5, sub: 'Os fusíveis estão velhos.' },
+  { dur: 120, decai0: 8, decai1: 18, fuseMin: 10, fuseMax: 20, criatura: 19, calorTaxa: 24, travaDur: 5.5, sub: 'A última noite. Não pare.' }
 ];
 
 export const FaseDinamo = {
@@ -129,12 +129,56 @@ export const FaseDinamo = {
     const flicker = Math.min(1, luz * (0.9 + Math.sin(performance.now() / 40) * .04 + (Math.random() - .5) * .05) + (s.relampago > 0 ? s.relampago * .6 : 0));
     const cx = W / 2, dy = H * .7, R = Math.min(W, H) * .13;
 
-    ctx.fillStyle = '#100d09'; ctx.fillRect(cx - R * 1.6, dy + R * .8, R * 3.2, R * .5);
-    ctx.lineWidth = R * .18; ctx.strokeStyle = `rgb(${40 + 90 * flicker},${28 + 60 * flicker},${16 + 30 * flicker})`;
-    ctx.beginPath(); ctx.arc(cx, dy, R, 0, 7); ctx.stroke();
-    ctx.save(); ctx.translate(cx, dy); ctx.rotate(s.ang); ctx.strokeStyle = `rgb(${50 + 110 * flicker},${35 + 70 * flicker},${18 + 30 * flicker})`; ctx.lineWidth = R * .08;
-    for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-R * .72, 0); ctx.lineTo(R * .72, 0); ctx.stroke(); }
+    // Lâmpada no teto
+    ctx.fillStyle = '#111';
+    ctx.fillRect(cx - 3, 0, 6, H * 0.15); // fio
+    ctx.beginPath(); ctx.arc(cx, H * 0.15, 12, 0, 7); ctx.fill(); // bocal
+    
+    // Brilho da lâmpada
+    const glowStr = 0.1 + flicker * 0.9;
+    ctx.fillStyle = `rgba(255, 230, 150, ${glowStr})`;
+    ctx.beginPath(); ctx.arc(cx, H * 0.15 + 10, 15, 0, 7); ctx.fill(); // bulbo
+    
+    // Halo da lâmpada clareando o ambiente
+    const lampGlow = ctx.createRadialGradient(cx, H * 0.15 + 10, 10, cx, H * 0.15 + 10, Math.max(W, H) * 0.65 * flicker + 10);
+    lampGlow.addColorStop(0, `rgba(255, 200, 80, ${0.25 * flicker})`);
+    lampGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = lampGlow;
+    ctx.fillRect(0, 0, W, H);
+
+    // --- GERADOR DE ENERGIA (DÍNAMO) ---
+    // Base pesada
+    ctx.fillStyle = '#0a0805'; ctx.fillRect(cx - R * 1.6, dy + R * 0.8, R * 3.2, R * 0.5);
+    
+    // Carcaça externa de ferro
+    ctx.fillStyle = '#16130e'; 
+    ctx.beginPath(); ctx.arc(cx, dy, R * 1.3, Math.PI, 2 * Math.PI); ctx.fill();
+    ctx.fillRect(cx - R * 1.3, dy, R * 2.6, R * 0.8);
+    
+    // Fundo interno do motor
+    ctx.fillStyle = '#050402'; ctx.beginPath(); ctx.arc(cx, dy, R, 0, 7); ctx.fill();
+    
+    // Bobinas de cobre brilhando com energia
+    ctx.lineWidth = R * .12; ctx.strokeStyle = `rgb(${70 + 130 * flicker},${40 + 70 * flicker},${10 + 20 * flicker})`;
+    ctx.beginPath(); ctx.arc(cx, dy, R * 0.8, 0, 7); ctx.stroke();
+
+    // Rotor central girando
+    ctx.save(); ctx.translate(cx, dy); ctx.rotate(s.ang); 
+    ctx.strokeStyle = '#2a2218'; ctx.lineWidth = R * .15;
+    for (let i = 0; i < 4; i++) { 
+        ctx.rotate(Math.PI / 2); 
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(R * 0.75, 0); ctx.stroke(); 
+    }
+    // Eixo central
+    ctx.fillStyle = '#1c1610'; ctx.beginPath(); ctx.arc(0, 0, R * 0.35, 0, 7); ctx.fill();
+    ctx.fillStyle = '#0a0806'; ctx.beginPath(); ctx.arc(0, 0, R * 0.15, 0, 7); ctx.fill();
     ctx.restore();
+    
+    // Grades de proteção frontal
+    ctx.strokeStyle = '#050403'; ctx.lineWidth = 6;
+    for(let i = -1; i <= 1; i+=2) {
+      ctx.beginPath(); ctx.moveTo(cx + i * R * 0.5, dy - R * 1.2); ctx.lineTo(cx + i * R * 0.5, dy + R * 0.8); ctx.stroke();
+    }
 
     s.faiscas.forEach(f => { ctx.fillStyle = `rgba(255,210,120,${f.vida})`; ctx.fillRect(f.x, f.y, 2.5, 2.5); });
     s.vapor.forEach(v => { ctx.fillStyle = `rgba(200,200,200,${v.vida * .18})`; ctx.beginPath(); ctx.arc(v.x, v.y, v.r, 0, 7); ctx.fill(); });
