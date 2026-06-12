@@ -187,7 +187,7 @@ export function triggerMorte(textoCausa) {
   document.getElementById('susto-aviso').className = 'on';
 
   const noc = GLOBAL.faseID === 1 ? GLOBAL.noiteDinamo : (GLOBAL.faseID === 2 ? 3 : (GLOBAL.faseID === 3 ? 4 : 5));
-  let pts = (noc * 1000) + Math.floor(GLOBAL.tempoAcumulado + GLOBAL.faseObj.S.t);
+  let pts = (noc * 1000) + Math.floor(GLOBAL.tempoAcumulado);
   if (GLOBAL.pesadelo) pts = Math.floor(pts * 1.5);
 
   import('./core/api.js').then(({ enviarScore }) => {
@@ -200,7 +200,10 @@ export function triggerMorte(textoCausa) {
   });
 }
 
+let estadoFim = 'morte';
+
 function mostrarFim(titulo, classe, texto, pts, pos) {
+  estadoFim = classe;
   GLOBAL.faseObj = null;
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('zonaE').classList.add('hidden');
@@ -212,13 +215,18 @@ function mostrarFim(titulo, classe, texto, pts, pos) {
   const t = document.getElementById('fim-titulo'); t.textContent = titulo; t.className = classe;
   document.getElementById('fim-texto').textContent = texto;
   document.getElementById('fim-rank-posicao').textContent = pos ? `★ #${pos} NO RANKING GLOBAL — ${pts.toLocaleString()} pts` : `PONTUAÇÃO: ${pts.toLocaleString()} pts`;
+  document.getElementById('btn-reiniciar').textContent = classe === 'morte' ? 'TENTAR NOVAMENTE' : 'JOGAR NOVAMENTE';
   document.getElementById('tela-fim').classList.remove('hidden');
   import('./core/api.js').then(({ carregarRanking }) => carregarRanking('#ranking-lista', 10));
 }
 
 document.getElementById('btn-reiniciar').addEventListener('click', () => {
   document.getElementById('tela-fim').classList.add('hidden');
-  iniciarPartida();
+  if (estadoFim === 'morte') {
+    prepararFase();
+  } else {
+    iniciarPartida();
+  }
 });
 
 function mostrarCutscene(linhas, callbackFim) {
